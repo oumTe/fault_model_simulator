@@ -2,7 +2,7 @@ import useful_functions
 
 
 def skip(lines):
-    for j in range(9):  # The number of instructions that will be skipped
+    for j in range(min(9, len(lines))):  # The number of instructions that will be skipped
         for i in range(len(lines)):  # The index of the first instruction that will be skipped
 
             # Copying the original code in another list so that we don't lose the initial instructions
