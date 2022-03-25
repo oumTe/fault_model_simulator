@@ -1,6 +1,7 @@
 import useful_functions
 import registers
 import fault_models
+import comparing_results
 
 """Initializing all the registers with the value of 0"""
 registers.initialize()
@@ -14,5 +15,8 @@ array = useful_functions.file_to_array('AssemblyCode.txt')
 useful_functions.execute_assembly(array, 'Golden')
 
 """Performing fault models"""
-fault_models.skip(array) # Skip Model
-# fault_models.operatorChange()
+fault_models.skip(array)  # Skip Model
+# # fault_models.operatorChange()
+
+"""Comparing results"""
+comparing_results.comparing_results()

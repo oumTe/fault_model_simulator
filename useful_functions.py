@@ -89,7 +89,6 @@ def execute_assembly(array, header):
     try:
         df = pd.read_csv('output.csv')
     except:
-        print('Creating a new file')
         df = pd.DataFrame()
 
     # Adding the output to the csv file
