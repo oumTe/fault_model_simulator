@@ -11,3 +11,8 @@ mov(R9,0)
 mov(R10,0)
 mov(R11,0)
 mov(R12,0)
+
+mov(Z,0)
+mov(N,0)
+mov(C,0)
+mov(V,0)

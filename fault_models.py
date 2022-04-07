@@ -1,37 +1,43 @@
+import registers
 import useful_functions
+from assembly import *
 
 
-def skip(lines):
+def skip(array):
     """
         This function executes the skip fault model.
 
             :parameter :
-                lines (array) : an array of assembly code
+                array (array) : an array of assembly code
 
     """
-    for j in range(min(9, len(lines))):  # The number of instructions that will be skipped
-        for i in range(len(lines)):  # The index of the first instruction that will be skipped
+    for j in range(1, min(9, len(array))):  # The number of instructions that will be skipped
+        i = 0
+
+        while j < len(array) - i + 1:   # Exiting the code if the number of the instructions left is less than the
+            # number of instructions that should be skipped
 
             # Copying the original code in another list so that we don't lose the initial instructions
-            copy_lines = lines.copy()
+            copy_lines = array.copy()
 
-            # Exiting the code if he number of the instructions left is less than the number of instructions that
-            # should be skipped
-            if i == (len(lines) - j + 1):
-                break
+            if copy_lines[i - 1].find(',') < 0 and copy_lines[i - 1].find('(') > 0:  # if it is a branch instruction,
+                # we will jump to the label line
+                i = eval(useful_functions.update_assembly_code(copy_lines[i - 1]))
+
             else:
-                for k in range(j):
-                    copy_lines[i + k] = "mov(R0,R0)"  # Skipping j instructions
-                    # The header will be in format skip_NumberOfInstructionsSkipped_IndexOfFirstInstructionSkipped
-                    header = 'skip_' + str(k + 1) + '_' + str(i + 1)
+                for k in range(j):  # Skipping j instructions
+                    copy_lines[i + k] = "mov(R0,R0)"
 
-                    """ Updating the registers with their initial values"""
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions from the file of initialization.
-                    useful_functions.execute_assembly(array_initialisation, 'initial')
+                # The header will be in format skip_NumberOfInstructionsSkipped_IndexOfFirstInstructionSkipped
+                header = 'skip_' + str(k + 1) + '_' + str(i + 1)
 
-                    """Executing the skip"""
-                    useful_functions.execute_assembly(copy_lines, header)
+                """ Updating the registers and the flags with their initial values"""
+                useful_functions.execute_assembly(array, 'initial')
+
+                """Executing the skip"""
+                useful_functions.execute_assembly(copy_lines, header)
+
+            i = i + 1
 
 
 def skip_and_repeat(lines):
@@ -42,7 +48,7 @@ def skip_and_repeat(lines):
                 lines (array) : an array of assembly code
 
     """
-    for i in range(len(lines)):   # The index of the instruction skipped
+    for i in range(len(lines)):  # The index of the instruction skipped
 
         # Copying the original code in another list so that we don't lose the initial instructions
         copy_lines = lines.copy()
@@ -51,7 +57,7 @@ def skip_and_repeat(lines):
             copy_lines[i] = lines[j]  # Repeating the instruction j
 
             # The header will be in format Skip_IndexOfInstructionSkipped_Repeat_IndexOfInstructionRepeated
-            header = "Skip_" + str(i+1) + "_Repeat_" + str(j+1)
+            header = "Skip_" + str(i + 1) + "_Repeat_" + str(j + 1)
 
             """ Updating the registers with their initial values"""
             array_initialisation = useful_functions.file_to_array(

@@ -20,6 +20,13 @@ def initialize():
     global R10
     global R11
     global R12
+    global Z
+    global N
+    global C
+    global V
+    global memory
+
+    """Registers"""
     R0 = 0
     R1 = 0
     R2 = 0
@@ -33,3 +40,12 @@ def initialize():
     R10 = 0
     R11 = 0
     R12 = 0
+
+    """Flags"""
+    Z = 0
+    N = 0
+    C = 0
+    V = 0
+
+    """Memory array"""
+    memory = [0] * 4000

@@ -50,18 +50,28 @@ def update_assembly_code(assembly_code):
             Returns:
                 (string) : An updates assembly code respecting the global variables syntax
     """
+    if assembly_code.find(',') > 0:  # updating the assembly code except for branches
 
-    list_of_arguments = get_arguments_of_function(assembly_code)  # Creating an array of the assembly function arguments
+        list_of_arguments = get_arguments_of_function(
+            assembly_code)  # Creating an array of the assembly function arguments
 
-    for j in range(len(list_of_arguments)):
-        if list_of_arguments[j].isnumeric():  # Verify if the argument is numeric, so we don't have to update it
-            break
-        else:  # If the argument is not numeric than it is a global variable, and so we have to replace its syntax
-            list_of_arguments[j] = 'registers.' + list_of_arguments[j]
+        for j in range(len(list_of_arguments)):
+            if list_of_arguments[j].isnumeric():  # Verify if the argument is numeric, so we don't have to update it
+                break
+            else:  # If the argument is not numeric than it is a global variable, and so we have to replace its syntax
+                list_of_arguments[j] = 'registers.' + list_of_arguments[j]
 
-    # Updating the syntax
-    updated_code = 'registers.' + assembly_code[assembly_code.find('(') + 1: assembly_code.find(',')] + ' = ' \
-                   + assembly_code[:assembly_code.find('(')] + '(' + ",".join(list_of_arguments) + ')'
+        # Updating the syntax
+        updated_code = 'registers.' + assembly_code[assembly_code.find('(') + 1: assembly_code.find(',')] + ' = ' \
+                       + assembly_code[:assembly_code.find('(')] + '(' + ",".join(list_of_arguments) + ')'
+
+    elif assembly_code.find('(') > 0:  # If it is a branch syntax
+        updated_code = assembly_code[:assembly_code.find('(')] + '("' + assembly_code[
+                                                                        assembly_code.find('(') + 1: len(
+                                                                            assembly_code) - 1] + '",array , i)'
+    else:  # If it is a label we change nothing
+        updated_code = assembly_code
+
     return updated_code
 
 
@@ -75,11 +85,21 @@ def execute_assembly(array, header):
                 header : The header of the csv column
 
     """
+
+    i = 0
+    while i < len(array):
+        if array[i].find('(') < 0:  # If the code is a label we do nothing
+            i = i + 1
+
+        if array[i].find(',') > 0:  # If the code is an assembly code but not a branch we execute it and increment i.
+            exec(update_assembly_code(array[i]))
+            i = i + 1
+
+        else:
+            i = eval(update_assembly_code(array[i]))  # If the code is a branch, i will become the index of the label
+
     # Creating a list that will contain the registers
     l = []
-    # Updating the code syntax
-    for i in array:
-        exec(update_assembly_code(i))
 
     # Initialize the registers and put them in an array
     for i in range(13):

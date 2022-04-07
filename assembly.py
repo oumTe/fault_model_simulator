@@ -1,5 +1,6 @@
 # This file contains the definition of some assembly functions
 import ctypes
+import registers
 
 """Register move instructions"""
 
@@ -12,8 +13,6 @@ def mov(Rd, n):
                 Rd (register) : The destination ARM register
                 n (int) :  8-bit immediate value or ARM register
 
-            Returns:
-                (int) : The new value stored in the register Rd
     """
     Rd = n
     return Rd
@@ -27,8 +26,6 @@ def movw(Rd, imm16):
                 Rd (register) : The destination ARM register
                 imm16 (int) :  16-bit immediate value
 
-            Returns:
-                (int) : The new value stored in the register Rd
     """
     Rd = imm16
     return Rd
@@ -42,8 +39,6 @@ def movt(Rd, imm16):
                 Rd (register) : The destination ARM register
                 imm16 (int) :  16-bit immediate value
 
-            Returns:
-                (int) : The new value stored in the register Rd
     """
     Rd = (Rd & 0xffff) | (imm16 << 16)
     return Rd
@@ -57,8 +52,7 @@ def movwt(Rd, imm32):
                 Rd (register) : The destination ARM register
                 imm32 (int) :  32-bit immediate value
 
-            Returns:
-                (int) : The new value stored in the register Rd
+
     """
     Rd = imm32
     return Rd
@@ -71,7 +65,60 @@ def movwt(Rd, imm32):
 
 def ldr(Rt, Rn, imm7):
     """
-        Load the register Rt from a 32-bit word contained in the memory address obtained by adding Rn et the 7-bit
+        Load the register Rt from a 32-bit word contained in the memory address obtained by adding Rn and the 7-bit
+        immediate value  imm7.
+
+            Parameters:
+                Rt (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm7 (int) :  7-bit immediate value
+
+    """
+    address = Rn + imm7
+    Rt = registers.memory[address]
+    return Rt
+
+
+def ldrb(Rt, Rn, imm5):
+    """
+        Load the register Rt from a byte contained in the memory address obtained by adding Rn and the 5-bit
+        immediate value imm5.
+
+            Parameters:
+                Rt (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm5 (int) :  5-bit immediate value
+
+    """
+    address = Rn + imm5
+    Rt = registers.memory[address]
+    return Rt
+
+
+def ldrh(Rt, Rn, imm6):
+    """
+        Load the register Rt from a 16-bit half-word contained in the memory address obtained by adding Rn and the 6-bit
+        immediate value  imm6.
+
+            Parameters:
+                Rt (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm6 (int) :  6-bit immediate value
+
+    """
+    address = Rn + imm6
+    Rt = registers.memory[address]
+    return Rt
+
+
+######################################################################################################################
+
+"""Store register to memory"""
+
+
+def str_(Rt, Rn, imm7):
+    """
+        Stores the value of the register Rt to the memory address obtained by adding Rn to the 7-bit
         immediate value  imm7.
 
             Parameters:
@@ -83,14 +130,14 @@ def ldr(Rt, Rn, imm7):
                 (int) : The new value stored in the register Rt
     """
     address = Rn + imm7
-    Rd = ctypes.cast(address, ctypes.py_object).value
-    return Rt
+    registers.memory[address] = Rt
+    return registers.memory[address]
 
 
 def ldrb(Rt, Rn, imm5):
     """
-        Load the register Rt from a byte contained in the memory address obtained by adding Rn et the 7-bit
-        immediate value  imm7.
+        Stores the value of the register Rt to the memory address obtained by adding Rn to the 5-bit
+        immediate value  imm5.
 
             Parameters:
                 Rt (register) : The destination ARM register
@@ -101,14 +148,14 @@ def ldrb(Rt, Rn, imm5):
                 (int) : The new value stored in the register Rt
     """
     address = Rn + imm5
-    Rd = ctypes.cast(address, ctypes.py_object).value
-    return Rt
+    Rt = registers.memory[address]
+    return registers.memory[address]
 
 
 def ldrh(Rt, Rn, imm6):
     """
-        Load the register Rt from a 16-bit half-word contained in the memory address obtained by adding Rn et the 7-bit
-        immediate value  imm7.
+        Stores the value of the register Rt to the memory address obtained by adding Rn to the 6-bit
+        immediate value  imm6.
 
             Parameters:
                 Rt (register) : The destination ARM register
@@ -119,8 +166,8 @@ def ldrh(Rt, Rn, imm6):
                 (int) : The new value stored in the register Rt
     """
     address = Rn + imm6
-    Rd = ctypes.cast(address, ctypes.py_object).value
-    return Rt
+    Rt = registers.memory[address]
+    return registers.memory[address]
 
 
 ######################################################################################################################
@@ -304,8 +351,88 @@ def bic(Rd, Rn):
 """Shift and rotation instructions"""
 
 
-def lsl(Rd, Rn):
-    """  Writes to Rd the result of left shifting Rn.
+def lsl(Rd, Rn, imm):
+    """  Writes to Rd the result of left shifting Rn by imm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits shifted
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = Rn << imm
+    return Rd
+
+
+def lsl(Rd, Rn, imm):
+    """  Writes to Rd the result of logical right-shifting Rn by imm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits shifted
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = (Rn & 0xffffffff) >> imm
+    return Rd
+
+
+def asr(Rd, Rn, imm):
+    """  Writes to Rd the result of arithmetic right-shifting Rn byimm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits shifted
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = Rn >> imm
+    return Rd
+
+
+def ror(Rd, Rn, imm):
+    """  Writes to Rd the result of right rotating Rn by imm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits rotated
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = (Rn >> imm) | (Rn << (32 - imm)) & 0xFFFFFFFF
+    return Rd
+
+
+def rol(Rd, Rn, imm):
+    """  Writes to Rd the result of left rotating Rn by imm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits rotated
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = (Rn << imm) | (Rn >> (32 - imm))
+    return Rd
+
+
+def rbit(Rd, Rn):
+    """  Writes to Rd the result of reversing bits of the register Rn (unsigned).
 
             Parameters:
                 Rd (register) : The destination ARM register
@@ -315,37 +442,195 @@ def lsl(Rd, Rn):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd <<= Rn
+    Rd = 0
+    i = 0
+    while i < 32:
+        Rd = (Rd << 1) + (Rn & 1)
+        Rn >>= 1
+        i += 1
     return Rd
 
 
-def lsl(Rd, Rn):
-    """  Writes to Rd the result of logical right-shifting Rn.
+#################################################################################
+"""Comparison instructions"""
+
+
+def cmp(Rn, n):
+    """
+        Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
+        based on the operation Rn-n.
 
             Parameters:
-                Rd (register) : The destination ARM register
-                Rn (register) : An ARM register
-
-            Returns:
-                (int) : The new value stored in the register Rd
+                Rd (register) : An ARM register
+                n (register) : an immediate value or other register
 
     """
-    Rd = (Rd & 0xffffffff) >> Rn
-    return Rd
+    m = Rn - n
+    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
+        registers.V = 0
+    if m > 2147483647 or m < -2147483648:
+        registers.C = 1
+    elif not (m > 2147483647 or m < -2147483648):
+        registers.C = 0
+    if m < 0:
+        registers.N = 1
+    elif m > 0:
+        registers.N = 0
+    if m == 0:
+        registers.Z = 1
+    elif m != 0:
+        registers.Z = 0
+    return Rn
 
 
-def asr(Rd, Rn):
-    """  Writes to Rd the result of arithmetic right-shifting Rn.
+def cmn(Rn, Rm):
+    """
+        Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
+        based on the operation Rn+Rm.
 
             Parameters:
-                Rd (register) : The destination ARM register
                 Rn (register) : An ARM register
-
-            Returns:
-                (int) : The new value stored in the register Rd
+                Rm (register) : An ARM register
 
     """
-    Rd >>= Rn
-    return Rd
+    m = Rn + Rm
+    if (Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0)):
+        registers.V = 0
+    if m > 2147483647 or m < -2147483648:
+        registers.C = 1
+    elif not (m > 2147483647 or m < -2147483648):
+        registers.C = 0
+    if m < 0:
+        registers.N = 1
+    elif m > 0:
+        registers.N = 0
+    if m == 0:
+        registers.Z = 1
+    elif m != 0:
+        registers.Z = 0
+    return Rn
 
 
+def tst(Rn, Rm):
+    """
+        Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
+        based on the operation Rn & Rm.
+
+            Parameters:
+                Rn (register) : An ARM register
+                Rm (register) : An ARM register
+
+    """
+    m = Rn & Rm
+    if m < 0:
+        registers.N = 1
+    elif m > 0:
+        registers.N = 0
+    if m == 0:
+        registers.Z = 1
+    elif m != 0:
+        registers.Z = 0
+    return Rn
+
+
+################################################################################
+"""Branch instructions"""
+
+
+def b(label, array, i):
+    """
+        Unconditional branch. It jumps to the ith instruction of the assembly code array.
+    """
+    for j in range(0, len(array)):
+        j = j + 1
+        if array[j] == label:
+            break
+    i = j
+    return i
+
+
+def be(label, array, i):
+    """
+        branch if equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 1.
+    """
+    if registers.Z == 1:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
+
+def bne(label, array, i):
+    """
+        branch if not equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 0.
+    """
+    if registers.Z == 0:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
+
+def bge(label, array, i):
+    """
+        branch if greater than or equal. It jumps to the ith instruction of the assembly code array if N flag is set
+        to 0 or the Z flag is set to 1.
+    """
+    if registers.Z == 1 or registers.N == 0:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
+
+def bgt(label, array, i):
+    """
+        branch if greater than. It jumps to the ith instruction of the assembly code array if N flag is set
+        to 0.
+    """
+    if registers.N == 0:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
+
+def ble(label, array, i):
+    """
+        branch if less than or equal. It jumps to the ith instruction of the assembly code array if N flag is set
+        to 1 or the Z flag is set to 1.
+    """
+    if registers.Z == 1 or registers.N == 1:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
+
+def blt(label, array, i):
+    """
+        branch if less than. It jumps to the ith instruction  of the assembly code array if N flag is set
+        to 1.
+    """
+    if registers.N == 1:
+        for i in range(0, len(array)):
+            i = i + 1
+            if array[i] == label:
+                break
+    else:
+        i = i + 1
+    return i
