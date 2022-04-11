@@ -95,31 +95,6 @@ def skip_and_repeat(array):
                     """Executing the skip"""
                     useful_functions.execute_assembly(cp1, header)
 
-# def skip_and_repeat(array):
-#     """
-#         This function executes the skip and repeat fault model.
-#
-#             :parameter :
-#                 lines (array) : an array of assembly code
-#
-#     """
-#     for i in range(len(array)):  # The index of the instruction skipped
-#
-#         # Copying the original code in another list so that we don't lose the initial instructions
-#         copy_lines = array.copy()
-#
-#         for j in range(0, i):  # The index of the instruction repeated
-#             copy_lines[i] = array[j]  # Repeating the instruction j
-#
-#             # The header will be in format Skip_IndexOfInstructionSkipped_Repeat_IndexOfInstructionRepeated
-#             header = "Skip_" + str(i + 1) + "_Repeat_" + str(j + 1)
-#
-#             """ Updating the registers with their initial values"""
-#             # useful_functions.execute_assembly(array, 'initial')
-#
-#             """Executing the skip"""
-#             # useful_functions.execute_assembly(copy_lines, header)
-#             print(header, copy_lines)
 
 def operator_change():
     """ Updating the registers with their initial values"""
