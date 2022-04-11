@@ -1,11 +1,8 @@
 add(R0, R0, R1)
 add(R1, R0, R1)
-cmp(R0,R0)
-be(hello)
 add(R2, R0, R2)
 add(R3, R0, 5)
 add(R4, R0, R2)
 add(R5, R0, 5)
-hello
 add(R6, R0, R2)
 add(R7, R0, 5)

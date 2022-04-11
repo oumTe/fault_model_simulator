@@ -71,7 +71,6 @@ def update_assembly_code(assembly_code):
                                                                             assembly_code) - 1] + '",array , i)'
     else:  # If it is a label we change nothing
         updated_code = assembly_code
-
     return updated_code
 
 

@@ -566,6 +566,7 @@ def be(label, array, i):
         i = i + 1
     return i
 
+
 def bne(label, array, i):
     """
         branch if not equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 0.
@@ -578,6 +579,7 @@ def bne(label, array, i):
     else:
         i = i + 1
     return i
+
 
 def bge(label, array, i):
     """
@@ -593,6 +595,7 @@ def bge(label, array, i):
         i = i + 1
     return i
 
+
 def bgt(label, array, i):
     """
         branch if greater than. It jumps to the ith instruction of the assembly code array if N flag is set
@@ -607,6 +610,7 @@ def bgt(label, array, i):
         i = i + 1
     return i
 
+
 def ble(label, array, i):
     """
         branch if less than or equal. It jumps to the ith instruction of the assembly code array if N flag is set
@@ -620,6 +624,7 @@ def ble(label, array, i):
     else:
         i = i + 1
     return i
+
 
 def blt(label, array, i):
     """
