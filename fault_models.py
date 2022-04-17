@@ -168,28 +168,46 @@ def skip_and_repeat(array):
 
 
 def model(array):
+    """
+        This function executes the skip and repeat fault model.
+
+            :parameter :
+                lines (array) : an array of assembly code
+
+    """
     i = 0
     while i < len(array) - 1:
         copy_array = array.copy()
+
+        # If the line of code or the one after has less than two arguments then we can not apply this model
         if len(useful_functions.get_arguments_of_function(array[i])) < 3 or len(
                 useful_functions.get_arguments_of_function(array[i + 1])) < 3:
             i = i + 1
+
         else:
-            code = array[i]
+            # Extracting the arguments from the line of code that will be corrupted
             arguments_corrupted_function = useful_functions.get_arguments_of_function(array[i])
+
+            # Extracting the arguments from the line of code that will be skipped
             arguments_skipped_function = useful_functions.get_arguments_of_function(array[i + 1])
+
+            # Corrupting the arguments of the instruction i by changing he first and last arguments with those of the
+            # skipped line
             arguments_corrupted_function[0] = arguments_skipped_function[0]
             arguments_corrupted_function[2] = arguments_skipped_function[2]
-            code = array[i][:array[i].find('(') + 1] + ",".join(arguments_corrupted_function) + ')'
+
+            # Replacing the instruction number i and i+1 with the corrupted instruction
             del copy_array[i:i + 2]
+            code = array[i][:array[i].find('(') + 1] + ",".join(arguments_corrupted_function) + ')'
             copy_array.insert(i, code)
 
-            header = "skipping" + str(i+1)
-            """ Updating the registers and the flags with their initial values"""
+            # Updating the registers and the flags with their initial values
             array_initialisation = useful_functions.file_to_array(
                 'initialisation.txt')  # Creating a list of instructions
             useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
 
+            # Executing the new formed code
+            header = "skipping" + str(i+1)  # The header is in the form "skipping" the number of instruction skipped
             useful_functions.execute_assembly(copy_array,header)
             i = i + 1
 
