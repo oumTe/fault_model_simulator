@@ -99,7 +99,25 @@ def execute_assembly(array, header):
 
     # Creating a list that will contain the registers
     l = []
+    # Initialize the registers and put them in an array
+    for i in range(13):
+        l.append(str(eval("registers.R{}".format(i))))
 
+    # Creating the csv file
+    try:
+        df = pd.read_csv('output.csv')
+    except:
+        df = pd.DataFrame()
+
+    # Adding the output to the csv file
+    df[header] = l
+    df.to_csv('output.csv', mode='w', index=False)
+
+
+def execute(code, header):
+    exec(update_assembly_code(code))
+    # Creating a list that will contain the registers
+    l = []
     # Initialize the registers and put them in an array
     for i in range(13):
         l.append(str(eval("registers.R{}".format(i))))

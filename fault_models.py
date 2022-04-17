@@ -30,7 +30,7 @@ def skip(array):
                     copy_lines[i + k] = "mov(R0,R0)"
 
                 # The header will be in format skip_NumberOfInstructionsSkipped_IndexOfFirstInstructionSkipped
-                header = 'skip_' + str(k + 1) + '_' + str(i + 1)
+                header = 'skip_' + str(k) + '_' + str(i)
 
                 """ Updating the registers and the flags with their initial values"""
                 array_initialisation = useful_functions.file_to_array(
@@ -41,6 +41,60 @@ def skip(array):
                 useful_functions.execute_assembly(copy_lines, header)
 
             i = i + 1
+
+
+# def skip_and_repeat(array):
+#     """
+#         This function executes the skip and repeat fault model.
+#
+#             :parameter :
+#                 lines (array) : an array of assembly code
+#
+#     """
+#     # Copying the original code in another list so that we don't lose the initial instructions
+#     number_of_instructions_skipped = 0
+#
+#     """
+#         The number of skipped instructions must be less than the length of the array minus the minimum number of
+#         repeated instructions
+#     """
+#     while number_of_instructions_skipped + math.ceil(number_of_instructions_skipped / 2) <= len(array):
+#
+#         number_of_instructions_skipped = number_of_instructions_skipped + 1
+#         # The index of the first skipped instruction  varies from 1 to length of the array minus the number of skipped
+#         # instructions
+#         for index_first_instruction_skipped in range(1, len(array) - number_of_instructions_skipped + 1):
+#             copy_lines = array.copy()
+#
+#             for k in range(number_of_instructions_skipped):
+#                 copy_lines.pop(index_first_instruction_skipped)  # Skipping number_of_instructions_skipped instructions
+#
+#             # The number of repeated instructions varies from the round of then number of skipped instructions div 2
+#             # and the minimum  between the number of instruction skipped multiplied by 2 and the number of
+#             # instructions already executed
+#             for number_of_instructions_repeated in range(math.ceil(number_of_instructions_skipped / 2),
+#                                                          min(number_of_instructions_skipped * 2,
+#                                                              index_first_instruction_skipped) + 1):
+#
+#                 for index_first_instruction_repeated in range(0, index_first_instruction_skipped -
+#                                                                  number_of_instructions_repeated + 1):
+#                     cp1 = copy_lines.copy()
+#                     for b in range(number_of_instructions_repeated):
+#                         cp1.insert(index_first_instruction_skipped+b, array[b + index_first_instruction_repeated])
+#
+#                     header = "NumInstrucskipped_" + str(number_of_instructions_skipped) + "_IndexFirstSkipped_" + str(
+#                         index_first_instruction_skipped) + "_NumInstrucRep_" + str(
+#                         number_of_instructions_repeated) + "_IndexFirstRep" + str(index_first_instruction_repeated)
+#
+#                     print(header)
+#                     print(cp1)
+#                     """ Updating the registers and the flags with their initial values"""
+#                     array_initialisation = useful_functions.file_to_array(
+#                         'initialisation.txt')  # Creating a list of instructions
+#                     useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
+#
+#                     """Executing the skip"""
+#                     useful_functions.execute_assembly(cp1, header)
 
 def skip_and_repeat(array):
     """
@@ -54,19 +108,21 @@ def skip_and_repeat(array):
     number_of_instructions_skipped = 0
 
     """
-        The number of skipped instructions must be less than the length of the array minus the minimum number of 
-        repeated instructions 
+        The number of skipped instructions must be less than the length of the array minus the minimum number of
+        repeated instructions
     """
     while number_of_instructions_skipped + math.ceil(number_of_instructions_skipped / 2) <= len(array):
 
         number_of_instructions_skipped = number_of_instructions_skipped + 1
         # The index of the first skipped instruction  varies from 1 to length of the array minus the number of skipped
         # instructions
-        for index_first_instruction_skipped in range(1, len(array) - number_of_instructions_skipped + 1):
+        index_first_instruction_skipped = 1
+        while index_first_instruction_skipped <= len(array) - number_of_instructions_skipped:
             copy_lines = array.copy()
 
-            for k in range(number_of_instructions_skipped):
-                copy_lines.pop(index_first_instruction_skipped)  # Skipping number_of_instructions_skipped instructions
+            # Skipping number_of_instructions_skipped instructions
+            del copy_lines[
+                index_first_instruction_skipped: index_first_instruction_skipped + number_of_instructions_skipped]
 
             # The number of repeated instructions varies from the round of then number of skipped instructions div 2
             # and the minimum  between the number of instruction skipped multiplied by 2 and the number of
@@ -78,8 +134,9 @@ def skip_and_repeat(array):
                 for index_first_instruction_repeated in range(0, index_first_instruction_skipped -
                                                                  number_of_instructions_repeated + 1):
                     cp1 = copy_lines.copy()
+
                     for b in range(number_of_instructions_repeated):
-                        cp1.insert(index_first_instruction_skipped+b, array[b + index_first_instruction_repeated])
+                        cp1.insert(index_first_instruction_skipped + b, array[b + index_first_instruction_repeated])
 
                     header = "NumInstrucskipped_" + str(number_of_instructions_skipped) + "_IndexFirstSkipped_" + str(
                         index_first_instruction_skipped) + "_NumInstrucRep_" + str(
@@ -94,6 +151,47 @@ def skip_and_repeat(array):
 
                     """Executing the skip"""
                     useful_functions.execute_assembly(cp1, header)
+            #                i = eval(useful_functions.update_assembly_code(copy_lines[i - 1]))
+            print("exited")
+            if array[index_first_instruction_skipped].find(',') < 0 and array[index_first_instruction_skipped].find(
+                    '(') > 0:
+                print('hhhhhhhhhhhhhhhhhhhhhhh', index_first_instruction_skipped,
+                      array[index_first_instruction_skipped], index_first_instruction_skipped)
+                i = index_first_instruction_skipped
+                i = eval(useful_functions.update_assembly_code(array[index_first_instruction_skipped]))
+                index_first_instruction_skipped = i + 1
+                print('llllllllllllllllllllllll', index_first_instruction_skipped,
+                      array[index_first_instruction_skipped], index_first_instruction_skipped)
+
+            else:
+                index_first_instruction_skipped = index_first_instruction_skipped + 1
+
+
+def model(array):
+    i = 0
+    while i < len(array) - 1:
+        copy_array = array.copy()
+        if len(useful_functions.get_arguments_of_function(array[i])) < 3 or len(
+                useful_functions.get_arguments_of_function(array[i + 1])) < 3:
+            i = i + 1
+        else:
+            code = array[i]
+            arguments_corrupted_function = useful_functions.get_arguments_of_function(array[i])
+            arguments_skipped_function = useful_functions.get_arguments_of_function(array[i + 1])
+            arguments_corrupted_function[0] = arguments_skipped_function[0]
+            arguments_corrupted_function[2] = arguments_skipped_function[2]
+            code = array[i][:array[i].find('(') + 1] + ",".join(arguments_corrupted_function) + ')'
+            del copy_array[i:i + 2]
+            copy_array.insert(i, code)
+
+            header = "skipping" + str(i+1)
+            """ Updating the registers and the flags with their initial values"""
+            array_initialisation = useful_functions.file_to_array(
+                'initialisation.txt')  # Creating a list of instructions
+            useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
+
+            useful_functions.execute_assembly(copy_array,header)
+            i = i + 1
 
 
 def operator_change():
