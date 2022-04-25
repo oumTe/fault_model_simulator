@@ -1,5 +1,5 @@
-sub(R1, R1, 5)
-add(R3, R3, 6)
+sub(R0, R1, 5)
+add(R1, R3, 6)
 sub(R2, R0, R2)
 cmp(R0,R0)
 be(label)

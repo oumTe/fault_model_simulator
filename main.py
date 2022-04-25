@@ -15,8 +15,8 @@ assembly_code = useful_functions.file_to_array('AssemblyCode.txt')
 useful_functions.execute_assembly(assembly_code, 'Golden')
 
 """Performing fault models"""
-fault_models.skip(assembly_code)  # Skip Model
-# fault_models.skip_and_repeat(assembly_code)  # Skip and repeat model
-fault_models.model(assembly_code)
+# fault_models.skip(assembly_code)  # Skip Model
+fault_models.skip_and_repeat(assembly_code)  # Skip and repeat model
+# fault_models.model(assembly_code)
 # """Comparing results"""
 # comparing_results.comparing_results()
