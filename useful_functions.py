@@ -91,12 +91,13 @@ def execute_assembly(array, header):
             i = i + 1
 
         if array[i].find(',') > 0:  # If the code is an assembly code but not a branch we execute it and increment i.
+            # print(update_assembly_code(array[i]))
             exec(update_assembly_code(array[i]))
             i = i + 1
 
         else:
             i = eval(update_assembly_code(array[i]))  # If the code is a branch, i will become the index of the label
-
+            print(update_assembly_code(array[i]))
     # Creating a list that will contain the registers
     l = []
     # Initialize the registers and put them in an array
@@ -114,20 +115,3 @@ def execute_assembly(array, header):
     df.to_csv('output.csv', mode='w', index=False)
 
 
-def execute(code, header):
-    exec(update_assembly_code(code))
-    # Creating a list that will contain the registers
-    l = []
-    # Initialize the registers and put them in an array
-    for i in range(13):
-        l.append(str(eval("registers.R{}".format(i))))
-
-    # Creating the csv file
-    try:
-        df = pd.read_csv('output.csv')
-    except:
-        df = pd.DataFrame()
-
-    # Adding the output to the csv file
-    df[header] = l
-    df.to_csv('output.csv', mode='w', index=False)

@@ -1,6 +1,7 @@
 # This file contains the definition of some assembly functions
 import ctypes
 import registers
+import numpy as np
 
 """Register move instructions"""
 
@@ -15,6 +16,7 @@ def mov(Rd, n):
 
     """
     Rd = n
+    Rd = np.uint32(Rd)
     return Rd
 
 
@@ -28,6 +30,7 @@ def movw(Rd, imm16):
 
     """
     Rd = imm16
+    Rd = np.uint32(Rd)
     return Rd
 
 
@@ -41,6 +44,7 @@ def movt(Rd, imm16):
 
     """
     Rd = (Rd & 0xffff) | (imm16 << 16)
+    Rd = np.uint32(Rd)
     return Rd
 
 
@@ -55,6 +59,7 @@ def movwt(Rd, imm32):
 
     """
     Rd = imm32
+    Rd = np.uint32(Rd)
     return Rd
 
 
@@ -76,6 +81,7 @@ def ldr(Rt, Rn, imm7):
     """
     address = Rn + imm7
     Rt = registers.memory[address]
+    Rt = np.uint32(Rt)
     return Rt
 
 
@@ -92,6 +98,7 @@ def ldrb(Rt, Rn, imm5):
     """
     address = Rn + imm5
     Rt = registers.memory[address]
+    Rt = np.uint32(Rt)
     return Rt
 
 
@@ -108,6 +115,7 @@ def ldrh(Rt, Rn, imm6):
     """
     address = Rn + imm6
     Rt = registers.memory[address]
+    Rt = np.uint32(Rt)
     return Rt
 
 
@@ -364,10 +372,11 @@ def lsl(Rd, Rn, imm):
 
     """
     Rd = Rn << imm
+    Rd = np.uint32(Rd)
     return Rd
 
 
-def lsl(Rd, Rn, imm):
+def lsls(Rd, Rn, imm):
     """  Writes to Rd the result of logical right-shifting Rn by imm bits.
 
             Parameters:
@@ -558,9 +567,9 @@ def be(label, array, i):
         branch if equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 1.
     """
     if registers.Z == 1:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
-            if array[i] == label:
+            if array[j] == label:
                 break
     else:
         i = i + 1
@@ -572,7 +581,7 @@ def bne(label, array, i):
         branch if not equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 0.
     """
     if registers.Z == 0:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
             if array[i] == label:
                 break
@@ -587,7 +596,7 @@ def bge(label, array, i):
         to 0 or the Z flag is set to 1.
     """
     if registers.Z == 1 or registers.N == 0:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
             if array[i] == label:
                 break
@@ -602,7 +611,7 @@ def bgt(label, array, i):
         to 0.
     """
     if registers.N == 0:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
             if array[i] == label:
                 break
@@ -617,7 +626,7 @@ def ble(label, array, i):
         to 1 or the Z flag is set to 1.
     """
     if registers.Z == 1 or registers.N == 1:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
             if array[i] == label:
                 break
@@ -632,7 +641,7 @@ def blt(label, array, i):
         to 1.
     """
     if registers.N == 1:
-        for i in range(0, len(array)):
+        for j in range(0, len(array)):
             i = i + 1
             if array[i] == label:
                 break
