@@ -3,6 +3,10 @@ import numpy as np
 
 
 def comparing_results():
+    """
+        This function compares the result contained in two files : the fault models outputs and the fault injection
+        output, and returns a list with the fault models that have probably occurred due to the fault injection.
+    """
     fault = pd.read_csv('fault.csv')
     delay_row = fault.index[13]
     fault = fault.T.sort_values(by=delay_row).T
@@ -23,8 +27,7 @@ def comparing_results():
 
 def comparing_results_by_line(line,number_of_experiences):
     """
-        This function compares the result contained in two files : the fault models outputs and the fault injection
-        output, and returns a list with the fault models that have probably occurred due to the fault injection.
+        This function compares with one line of the file containing faulty behaviour
     """
     models = pd.read_csv('output.csv')  # Reading the file containing the output of different fault models
     result = []  # Initialize the list that will have the software models with similar results as the fault injection

@@ -97,7 +97,7 @@ def execute_assembly(array, header):
 
         else:
             i = eval(update_assembly_code(array[i]))  # If the code is a branch, i will become the index of the label
-            print(update_assembly_code(array[i]))
+
     # Creating a list that will contain the registers
     l = []
     # Initialize the registers and put them in an array
@@ -113,5 +113,4 @@ def execute_assembly(array, header):
     # Adding the output to the csv file
     df[header] = l
     df.to_csv('output.csv', mode='w', index=False)
-
 
