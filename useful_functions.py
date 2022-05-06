@@ -74,15 +74,13 @@ def update_assembly_code(assembly_code):
     return updated_code
 
 
-def execute_assembly(array, header):
+def execute_assembly(array):
     """
             This function runs the assembly code contained in an array and appends the output to a csv file with
             the header "header".
 
             Parameters:
                 array (string) : An array of Assembly instructions
-                header : The header of the csv column
-
     """
 
     i = 0
@@ -90,14 +88,16 @@ def execute_assembly(array, header):
         if array[i].find('(') < 0:  # If the code is a label we do nothing
             i = i + 1
 
-        if array[i].find(',') > 0:  # If the code is an assembly code but not a branch we execute it and increment i.
-            # print(update_assembly_code(array[i]))
+        elif array[i].find(',') > 0:  # If the code is an assembly code but not a branch we execute it and increment i.
+            print(update_assembly_code(array[i]))
             exec(update_assembly_code(array[i]))
             i = i + 1
 
-        else:
+        elif array[i].find(',') < 0 and array[i].find('(') > 0:
             i = eval(update_assembly_code(array[i]))  # If the code is a branch, i will become the index of the label
 
+
+def fault_simulation_output(header):
     # Creating a list that will contain the registers
     l = []
     # Initialize the registers and put them in an array

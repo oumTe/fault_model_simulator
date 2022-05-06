@@ -36,10 +36,12 @@ def skip(array):
                 """ Updating the registers and the flags with their initial values"""
                 array_initialisation = useful_functions.file_to_array(
                     'initialisation.txt')  # Creating a list of instructions
-                useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
-
+                useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
+                print('---------------------------------------------')
+                print(header)
                 """Executing the skip"""
-                useful_functions.execute_assembly(copy_lines, header)
+                useful_functions.execute_assembly(copy_lines)
+                useful_functions.fault_simulation_output(header)
 
             i = i + 1
 
@@ -84,12 +86,15 @@ def one_instruction_corruption(array):
             registers.initialize()
             array_initialisation = useful_functions.file_to_array(
                 'initialisation.txt')  # Creating a list of instructions
-            useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
+            useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
             header = "SingleInstructionCorruption_" + str(
                 i + 1)  # The header is in the form "SingleInstructionCorruption" the index of the skipped instruction
-            useful_functions.execute_assembly(copy_array, header)
+            print('---------------------------------------------')
+            print(header)
+            useful_functions.execute_assembly(copy_array)
+            useful_functions.fault_simulation_output(header)
             i = i + 1
 
 
@@ -144,15 +149,17 @@ def two_instruction_corruption(array):
             registers.initialize()
             array_initialisation = useful_functions.file_to_array(
                 'initialisation.txt')  # Creating a list of instructions
-            useful_functions.execute_assembly(array_initialisation, 'initial')  # Executing the instruction
+            useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
             header = "TwoInstructionsCorruption,First_" + str(
                 i + 1) + "_Second_" + str(
                 i + 2)  # The header is in the form "TwoInstructionsCorruption,First_" the number of the first
             # corrupted function , second , index of second corrupted one
-
-            useful_functions.execute_assembly(copy_array, header)
+            print('---------------------------------------------')
+            print(header)
+            useful_functions.execute_assembly(copy_array)
+            useful_functions.fault_simulation_output(header)
             i = i + 1
 
 
@@ -232,13 +239,25 @@ def two_instruction_corruption(array):
 #             else:
 #                 index_first_instruction_skipped = index_first_instruction_skipped + 1
 
+def new_index(array , index , code):
+    i = 0
+    i = eval(useful_functions.update_assembly_code(code))
+    return i
+
+
 def skipping(array, index_skip):
     Cp_array = array[0:index_skip]
     return Cp_array
 
 
 def repeating(array, index_repeat, number_to_repeat):
-    Cp_array = array[index_repeat:index_repeat + number_to_repeat]
+    Cp_array = []
+    for b in range(number_to_repeat):
+        if array[index_repeat+ b ].find('(') > 0 and array[index_repeat+b].find(',') < 0 :
+            Cp_array = Cp_array + array[index_repeat+b : ]
+            break
+        else :
+            Cp_array = Cp_array + array[index_repeat + b: index_repeat + b+1]
     return Cp_array
 
 
@@ -250,17 +269,32 @@ def skip_and_repeat(array):
         index_skip = 1
         while index_skip + number_skip <= len(array):
             cp_array = skipping(array, index_skip)
+            header  = "index_skip" + str(index_skip)
             for number_of_repeat in range(math.ceil(number_skip / 2), number_skip * 2 + 1):
                 index_repeat = 0
                 cp_array2 = []
                 while index_repeat + number_of_repeat - 1 < index_skip:
                     cp_array2 = repeating(array, index_repeat, number_of_repeat)
-                    cp = array[index_skip + number_skip:]
+                    cp = []
+                    if cp_array2[len(cp_array2) - 1 ] != array[len(array) - 1 ] :
+                        cp = array[index_skip + number_skip:]
                     header = "NumInstrucskipped_" + str(number_skip) + "_IndexFirstSkipped_" + str(
                         index_skip) + "_NumInstrucRep_" + str(
                         number_of_repeat) + "_IndexFirstRep" + str(index_repeat)
-                    print(header)
-                    print(cp_array + cp_array2 + cp)
+
+                    registers.initialize()
+                    array_initialisation = useful_functions.file_to_array(
+                        'initialisation.txt')  # Creating a list of instructions
+                    useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
                     print('--------------------------------------------------')
+                    print(header)
+                    useful_functions.execute_assembly(cp_array)
+                    useful_functions.execute_assembly(cp_array2)
+                    useful_functions.execute_assembly(cp)
+                    useful_functions.fault_simulation_output(header)
                     index_repeat = index_repeat + 1
-            index_skip = index_skip + 1
+            if array[index_skip].find('(') > 0 and array[index_skip].find(',') < 0 :
+                index_skip = new_index(array , index_skip, array[index_skip])
+
+            else :
+                index_skip = index_skip + 1

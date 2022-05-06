@@ -567,9 +567,10 @@ def be(label, array, i):
         branch if equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 1.
     """
     if registers.Z == 1:
-        for j in range(0, len(array)):
-            i = i + 1
+        i = 0
+        for j in range(len(array)):
             if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1

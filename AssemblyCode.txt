@@ -1,4 +1,11 @@
 sub(R0, R1, 5)
 add(R1, R3, 6)
 sub(R2, R0, R2)
-cmp(R3,R0)
+cmp(R3,R3)
+be(label)
+add(R4, R0, 5)
+sub(R5, R0, R2)
+label
+sub(R6, R0, R2)
+add(R7, R0, 5)
+sub(R8,R8,0)

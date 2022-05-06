@@ -15,14 +15,17 @@ def comparing_results():
     while index < fault.shape[1]:
         for i in range(len(unique_elements)):
             count = 0
-            print('--------------------- Delay = ' , unique_elements[i])
+            text_file = open("result.txt", "a")
+            text_file.write('--------------------- Delay = {} \n'.format(unique_elements[i]))
             number_of_experiences = input("Please enter the number of experiences at this delay: ")
             for j in range(counts_elements[i]):
                 count = count + fault.loc[14][index]
+                text_file.close()
                 comparing_results_by_line(fault.iloc[:, index], int(number_of_experiences))
                 index = index + 1
                 count = int(number_of_experiences) - count
-            print('Crashes at delay = ', unique_elements[i], 'equals' ,  count)
+            text_file = open("result.txt", "a")
+            text_file.write('Crashes at delay = {} equals {} \n'.format(unique_elements[i] , count))
 
 
 def comparing_results_by_line(line,number_of_experiences):
@@ -50,17 +53,17 @@ def comparing_results_by_line(line,number_of_experiences):
         """
         if boolean:
             result.append(models.iloc[:, i].name)
+    text_file = open("result.txt", "a")
 
-    print('The output of the physical injection is :\n' , line.to_list())
+    text_file.write('The output of the physical injection is : {} \n'.format(line.to_list()))
     if len(result) == 0:
-        print('Model Name : This is an unknown model')
+        text_file.write('Model Name : This is an unknown model \n')
     else:
         name = ''
         for i in range(len(result)):
             name = changing_name(result[i])
-        print(name)
-
-    print('This model was observed ', line[14] * 100 / number_of_experiences , "% of times")
+        text_file.write(name)
+    text_file.write('This model was observed {} % of times \n'.format(line[14] * 100 / number_of_experiences))
 
 
 def changing_name(name):
