@@ -4,7 +4,7 @@ This file includes the global variables that, in our situation, represent the re
 By default, they are set to zero.
 
 """
-
+import numpy as np
 
 def initialize():
     global R0
@@ -20,6 +20,9 @@ def initialize():
     global R10
     global R11
     global R12
+    global R13
+    global R14
+    global R15
     global Z
     global N
     global C
@@ -27,19 +30,22 @@ def initialize():
     global memory
 
     """Registers"""
-    R0 = 0
-    R1 = 0
-    R2 = 0
-    R3 = 0
-    R4 = 0
-    R5 = 0
-    R6 = 0
-    R7 = 0
-    R8 = 0
-    R9 = 0
-    R10 = 0
-    R11 = 0
-    R12 = 0
+    R0 = np.int32(0)
+    R1 = np.int32(0)
+    R2 = np.int32(0)
+    R3 = np.int32(0)
+    R4 = np.int32(0)
+    R5 = np.int32(0)
+    R6 = np.int32(0)
+    R7 = np.int32(0)
+    R8 = np.int32(0)
+    R9 = np.int32(0)
+    R10 = np.int32(0)
+    R11 = np.int32(0)
+    R12 = np.int32(0)
+    R13 = np.int32(110)
+    R14 = np.int32(180)
+    R15 = np.int32(250)
 
     """Flags"""
     Z = 0

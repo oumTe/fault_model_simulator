@@ -17,6 +17,7 @@ def file_to_array(file_path):
     """
     text_file = open(file_path, "r")
     lines = text_file.read().splitlines()
+    lines = [each_string.upper() for each_string in lines]
     text_file.close()
     return lines
 

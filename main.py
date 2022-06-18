@@ -7,7 +7,6 @@ import os
 # First let us delete the file that contains the final result if it already exists
 try:
     os.remove("output.csv")
-    os.remove("result.txt")
 except:
     print("file doesn't exist")
 
@@ -24,10 +23,14 @@ assembly_code = useful_functions.file_to_array('AssemblyCode.txt')
 useful_functions.execute_assembly(assembly_code)
 useful_functions.fault_simulation_output('Golden')
 """Performing fault models"""
-fault_models.skip(assembly_code)  # Skip Model
-fault_models.skip_and_repeat(assembly_code)  # Skip and repeat model
-fault_models.one_instruction_corruption(assembly_code)
-fault_models.two_instruction_corruption(assembly_code)
-
+# fault_models.skip(assembly_code)  # Skip Model
+# fault_models.skip_and_repeat(assembly_code)  # Skip and repeat model
+# fault_models.one_instruction_corruption(assembly_code)
+# fault_models.two_instruction_corruption(assembly_code)
+# fault_models.destination_corruption(assembly_code)
+# fault_models.first_source_operand_replacement(assembly_code)
+# fault_models.second_source_operand_replacement(assembly_code)
+# fault_models.CorruptionandNewExcecution(assembly_code)
+fault_models.twoCorruption(assembly_code)
 """Comparing results"""
 comparing_results.comparing_results()

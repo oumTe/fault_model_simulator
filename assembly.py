@@ -1,12 +1,13 @@
 # This file contains the definition of some assembly functions
 import ctypes
+
 import registers
 import numpy as np
 
 """Register move instructions"""
 
 
-def mov(Rd, n):
+def MOV(Rd, n):
     """
         Writes to Rd the value of n which could be an ARM register or an 8-bit immediate value.
 
@@ -16,11 +17,33 @@ def mov(Rd, n):
 
     """
     Rd = n
-    Rd = np.uint32(Rd)
+    Rd = np.int32(Rd)
     return Rd
 
 
-def movw(Rd, imm16):
+def MOVS(Rd, n):
+    """
+        Writes to Rd the value of n which could be an ARM register or an 8-bit immediate value and updates N and Z flags.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                n (int) :  8-bit immediate value or ARM register
+
+    """
+    Rd = n
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    else:
+        registers.Z = 1
+    return Rd
+
+
+def MOVW(Rd, imm16):
     """
         Writes a 16-bit immediate value to Rd.
 
@@ -30,11 +53,11 @@ def movw(Rd, imm16):
 
     """
     Rd = imm16
-    Rd = np.uint32(Rd)
+    Rd = np.int32(Rd)
     return Rd
 
 
-def movt(Rd, imm16):
+def MOVT(Rd, imm16):
     """
         Writes a 16-bit immediate value to the top half-word of a register, without affecting the bottom half-word.
 
@@ -44,11 +67,11 @@ def movt(Rd, imm16):
 
     """
     Rd = (Rd & 0xffff) | (imm16 << 16)
-    Rd = np.uint32(Rd)
+    Rd = np.int32(Rd)
     return Rd
 
 
-def movwt(Rd, imm32):
+def MOVWT(Rd, imm32):
     """
         Writes a 32-bit immediate value to Rd.
 
@@ -59,7 +82,7 @@ def movwt(Rd, imm32):
 
     """
     Rd = imm32
-    Rd = np.uint32(Rd)
+    Rd = np.int32(Rd)
     return Rd
 
 
@@ -68,7 +91,7 @@ def movwt(Rd, imm32):
 """Load register from memory"""
 
 
-def ldr(Rt, Rn, imm7):
+def LDR(Rt, Rn, imm7):
     """
         Load the register Rt from a 32-bit word contained in the memory address obtained by adding Rn and the 7-bit
         immediate value  imm7.
@@ -81,11 +104,11 @@ def ldr(Rt, Rn, imm7):
     """
     address = Rn + imm7
     Rt = registers.memory[address]
-    Rt = np.uint32(Rt)
+    Rt = np.int32(Rt)
     return Rt
 
 
-def ldrb(Rt, Rn, imm5):
+def LDRB(Rt, Rn, imm5):
     """
         Load the register Rt from a byte contained in the memory address obtained by adding Rn and the 5-bit
         immediate value imm5.
@@ -98,11 +121,11 @@ def ldrb(Rt, Rn, imm5):
     """
     address = Rn + imm5
     Rt = registers.memory[address]
-    Rt = np.uint32(Rt)
+    Rt = np.int32(Rt)
     return Rt
 
 
-def ldrh(Rt, Rn, imm6):
+def LDRH(Rt, Rn, imm6):
     """
         Load the register Rt from a 16-bit half-word contained in the memory address obtained by adding Rn and the 6-bit
         immediate value  imm6.
@@ -115,7 +138,7 @@ def ldrh(Rt, Rn, imm6):
     """
     address = Rn + imm6
     Rt = registers.memory[address]
-    Rt = np.uint32(Rt)
+    Rt = np.int32(Rt)
     return Rt
 
 
@@ -124,7 +147,7 @@ def ldrh(Rt, Rn, imm6):
 """Store register to memory"""
 
 
-def str_(Rt, Rn, imm7):
+def STR_(Rt, Rn, imm7):
     """
         Stores the value of the register Rt to the memory address obtained by adding Rn to the 7-bit
         immediate value  imm7.
@@ -142,7 +165,7 @@ def str_(Rt, Rn, imm7):
     return registers.memory[address]
 
 
-def ldrb(Rt, Rn, imm5):
+def LDRB(Rt, Rn, imm5):
     """
         Stores the value of the register Rt to the memory address obtained by adding Rn to the 5-bit
         immediate value  imm5.
@@ -160,7 +183,7 @@ def ldrb(Rt, Rn, imm5):
     return registers.memory[address]
 
 
-def ldrh(Rt, Rn, imm6):
+def LDRH(Rt, Rn, imm6):
     """
         Stores the value of the register Rt to the memory address obtained by adding Rn to the 6-bit
         immediate value  imm6.
@@ -182,7 +205,7 @@ def ldrh(Rt, Rn, imm6):
 """Arithmetic instructions"""
 
 
-def add(Rd, Rn, n):
+def ADD(Rd, Rn, n):
     """ Writes to the register Rd the result obtained by adding the immediate value or the register n to the register Rn
 
             Parameters:
@@ -195,12 +218,49 @@ def add(Rd, Rn, n):
 
     """
     Rd = Rn + n
+    Rd = np.int32(Rd)
     return Rd
 
 
-def sub(Rd, Rn, n):
+def ADDS(Rd, Rn, n):
+    """ Writes to the register Rd the result obtained by adding the immediate value or the register n to the register Rn
+        and updates the flags
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                n (int) :  immediate value or ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    m = Rn + n
+
+    if (Rn > 0 and n > 0 and m < 0) or (Rn < 0 and n < 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and n > 0 and m < 0) or (Rn < 0 and n < 0 and m > 0)):
+        registers.V = 0
+
+    if m > 2147483647 or m < -2147483648:
+        registers.C = 1
+    elif not (m > 2147483647 or m < -2147483648):
+        registers.C = 0
+    Rd = np.int32(m)
+    if m < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif m > 0:
+        registers.N = 0
+        registers.Z = 0
+    if m == 0:
+        registers.Z = 1
+
+    return Rd
+
+
+def SUB(Rd, Rn, n):
     """ Writes to the register Rd the result obtained by subtracting the immediate value or the register n from
-        the register Rn
+        the register Rn .
 
             Parameters:
                 Rd (register) : The destination ARM register
@@ -212,10 +272,45 @@ def sub(Rd, Rn, n):
 
     """
     Rd = Rn - n
+    Rd = np.int32(Rd)
     return Rd
 
 
-def neg(Rd, Rn):
+def SUBS(Rd, Rn, n):
+    """ Writes to the register Rd the result obtained by subtracting the immediate value or the register n from
+        the register Rn and updates the flags.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                n (int) :  immediate value or ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    m = Rn - n
+    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
+        registers.V = 0
+    if m > 2147483647 or m < -2147483648:
+        registers.C = 1
+    elif not (m > 2147483647 or m < -2147483648):
+        registers.C = 0
+    if m < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif m > 0:
+        registers.N = 0
+        registers.Z = 0
+    if m == 0:
+        registers.Z = 1
+    Rd = np.int32(m)
+    return Rd
+
+
+def NEG(Rd, Rn):
     """ Writes to the register Rd the negation of the register Rn
 
             Parameters:
@@ -227,10 +322,11 @@ def neg(Rd, Rn):
 
     """
     Rd = -Rn
+    Rd = np.int32(Rd)
     return Rd
 
 
-def mul(Rd, Rn):
+def MUL(Rd, Rn):
     """ Writes to the register Rd the result obtained by multiplying the register Rd by the register Rn
             Parameters:
                 Rd (register) : The destination ARM register
@@ -241,10 +337,11 @@ def mul(Rd, Rn):
 
     """
     Rd = Rd * Rn
+    Rd = np.int32(Rd)
     return Rd
 
 
-def sdiv(Rd, Rn, Rm):
+def SDIV(Rd, Rn, Rm):
     """ Writes to the register Rd the result obtained after a signed division of the register Rn by the register Rm.
 
             Parameters:
@@ -257,10 +354,11 @@ def sdiv(Rd, Rn, Rm):
 
     """
     Rd = Rn / Rm
+    Rd = np.int32(Rd)
     return Rd
 
 
-def udiv(Rd, Rn, Rm):
+def UDIV(Rd, Rn, Rm):
     """ Writes to the register Rd the result obtained after an unsigned division of the register Rn by the register Rm.
 
             Parameters:
@@ -273,6 +371,7 @@ def udiv(Rd, Rn, Rm):
 
     """
     Rd = Rn / Rm
+    Rd = np.int32(Rd)
     return Rd
 
 
@@ -280,7 +379,7 @@ def udiv(Rd, Rn, Rm):
 """Logical instructions"""
 
 
-def and_(Rd, Rn):
+def AND_(Rd, Rn):
     """ Writes to the register Rd the result obtained after performing a bitwise AND between Rd and Rn.
 
             Parameters:
@@ -292,10 +391,35 @@ def and_(Rd, Rn):
 
     """
     Rd &= Rn
+    Rd = np.int32(Rd)
     return Rd
 
 
-def orr(Rd, Rn):
+def ANDS(Rd, Rn):
+    """ Writes to the register Rd the result obtained after performing a bitwise AND between Rd and Rn.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd &= Rn
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
+    return Rd
+
+
+def ORR(Rd, Rn):
     """ Writes to the register Rd the result obtained after performing a bitwise OR between Rd and Rn.
 
             Parameters:
@@ -307,10 +431,35 @@ def orr(Rd, Rn):
 
     """
     Rd |= Rn
+    Rd = np.int32(Rd)
     return Rd
 
 
-def ero(Rd, Rn):
+def ORRS(Rd, Rn):
+    """ Writes to the register Rd the result obtained after performing a bitwise OR between Rd and Rn
+        and updates the flags.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd |= Rn
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
+    return Rd
+
+def ERO(Rd, Rn):
     """ Writes to the register Rd the result obtained after performing a bitwise XOR between Rd and Rn.
 
             Parameters:
@@ -322,10 +471,36 @@ def ero(Rd, Rn):
 
     """
     Rd ^= Rn
+    Rd = np.int32(Rd)
+    return Rd
+
+def EROS(Rd, Rn):
+    """ Writes to the register Rd the result obtained after performing a bitwise XOR between Rd and Rn.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd ^= Rn
+    Rd = np.int32(Rd)
+
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
     return Rd
 
 
-def mvn(Rd, Rn):
+
+def MVN(Rd, Rn):
     """ Writes to the register Rd the r 1’s complement of Rn.
 
             Parameters:
@@ -337,10 +512,34 @@ def mvn(Rd, Rn):
 
     """
     Rd = Rn ^ 0xffffffff
+    Rd = np.int32(Rd)
+    return Rd
+
+def MVNS(Rd, Rn):
+    """ Writes to the register Rd the r 1’s complement of Rn.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = Rn ^ 0xffffffff
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
     return Rd
 
 
-def bic(Rd, Rn):
+def BIC(Rd, Rn):
     """  Bit clear Rd using mask in Rn.
 
             Parameters:
@@ -352,14 +551,37 @@ def bic(Rd, Rn):
 
     """
     Rd &= ~Rn
+    Rd = np.int32(Rd)
     return Rd
 
+def BICS(Rd, Rn):
+    """  Bit clear Rd using mask in Rn and updates the flags.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd &= ~Rn
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
+    return Rd
 
 ######################################################################################################################
 """Shift and rotation instructions"""
 
 
-def lsl(Rd, Rn, imm):
+def LSL(Rd, Rn, imm):
     """  Writes to Rd the result of left shifting Rn by imm bits.
 
             Parameters:
@@ -372,12 +594,12 @@ def lsl(Rd, Rn, imm):
 
     """
     Rd = Rn << imm
-    Rd = np.uint32(Rd)
+    Rd = np.int32(Rd)
     return Rd
 
 
-def lsls(Rd, Rn, imm):
-    """  Writes to Rd the result of logical right-shifting Rn by imm bits.
+def LSLS(Rd, Rn, imm):
+    """  Writes to Rd the result of logical left-shifting Rn by imm bits.
 
             Parameters:
                 Rd (register) : The destination ARM register
@@ -388,12 +610,27 @@ def lsls(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = (Rn & 0xffffffff) >> imm
+    Rd = Rn  << imm
+    if imm != 0 :
+        if Rd > 2147483647 or Rd < -2147483648:
+            registers.C = 1
+        elif not (Rd > 2147483647 or Rd < -2147483648):
+            registers.C = 0
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
     return Rd
 
 
-def asr(Rd, Rn, imm):
-    """  Writes to Rd the result of arithmetic right-shifting Rn byimm bits.
+
+def LSR(Rd, Rn, imm):
+    """  Writes to Rd the result of right shifting Rn by imm bits.
 
             Parameters:
                 Rd (register) : The destination ARM register
@@ -405,10 +642,58 @@ def asr(Rd, Rn, imm):
 
     """
     Rd = Rn >> imm
+    Rd = np.int32(Rd)
     return Rd
 
 
-def ror(Rd, Rn, imm):
+def LSRS(Rd, Rn, imm):
+    """  Writes to Rd the result of logical right-shifting Rn by imm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits shifted
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = Rn  >> imm
+    if imm != 0 :
+        if Rd > 2147483647 or Rd < -2147483648:
+            registers.C = 1
+        elif not (Rd > 2147483647 or Rd < -2147483648):
+            registers.C = 0
+    Rd = np.int32(Rd)
+    if Rd < 0:
+        registers.N = 1
+        registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
+    return Rd
+
+
+def ASR(Rd, Rn, imm):
+    """  Writes to Rd the result of arithmetic right-shifting Rn byimm bits.
+
+            Parameters:
+                Rd (register) : The destination ARM register
+                Rn (register) : An ARM register
+                imm (int) : immediate value, number of bits shifted
+
+            Returns:
+                (int) : The new value stored in the register Rd
+
+    """
+    Rd = (Rn & 0xffffffff) >> imm
+    Rd = np.int32(Rd)
+    return Rd
+
+
+def ROR(Rd, Rn, imm):
     """  Writes to Rd the result of right rotating Rn by imm bits.
 
             Parameters:
@@ -421,10 +706,11 @@ def ror(Rd, Rn, imm):
 
     """
     Rd = (Rn >> imm) | (Rn << (32 - imm)) & 0xFFFFFFFF
+    Rd = np.int32(Rd)
     return Rd
 
 
-def rol(Rd, Rn, imm):
+def ROL(Rd, Rn, imm):
     """  Writes to Rd the result of left rotating Rn by imm bits.
 
             Parameters:
@@ -437,10 +723,11 @@ def rol(Rd, Rn, imm):
 
     """
     Rd = (Rn << imm) | (Rn >> (32 - imm))
+    Rd = np.int32(Rd)
     return Rd
 
 
-def rbit(Rd, Rn):
+def RBIT(Rd, Rn):
     """  Writes to Rd the result of reversing bits of the register Rn (unsigned).
 
             Parameters:
@@ -457,6 +744,7 @@ def rbit(Rd, Rn):
         Rd = (Rd << 1) + (Rn & 1)
         Rn >>= 1
         i += 1
+    Rd = np.int32(Rd)
     return Rd
 
 
@@ -464,7 +752,7 @@ def rbit(Rd, Rn):
 """Comparison instructions"""
 
 
-def cmp(Rn, n):
+def CMP(Rn, n):
     """
         Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
         based on the operation Rn-n.
@@ -485,16 +773,17 @@ def cmp(Rn, n):
         registers.C = 0
     if m < 0:
         registers.N = 1
+        registers.Z = 0
     elif m > 0:
         registers.N = 0
+        registers.Z = 0
     if m == 0:
         registers.Z = 1
-    elif m != 0:
-        registers.Z = 0
+
     return Rn
 
 
-def cmn(Rn, Rm):
+def CMN(Rn, Rm):
     """
         Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
         based on the operation Rn+Rm.
@@ -524,7 +813,7 @@ def cmn(Rn, Rm):
     return Rn
 
 
-def tst(Rn, Rm):
+def TST(Rn, Rm):
     """
         Sets the APSR (Application Program Status Register) N (negative), Z (zero), C (carry) and V (overflow) flags,
         based on the operation Rn & Rm.
@@ -534,15 +823,16 @@ def tst(Rn, Rm):
                 Rm (register) : An ARM register
 
     """
-    m = Rn & Rm
-    if m < 0:
+    Rd = Rn & Rm
+    if Rd < 0:
         registers.N = 1
-    elif m > 0:
-        registers.N = 0
-    if m == 0:
-        registers.Z = 1
-    elif m != 0:
         registers.Z = 0
+    elif Rd > 0:
+        registers.N = 0
+        registers.N = 0
+        registers.Z = 0
+    if Rd == 0:
+        registers.Z = 1
     return Rn
 
 
@@ -550,19 +840,19 @@ def tst(Rn, Rm):
 """Branch instructions"""
 
 
-def b(label, array, i):
+def B(label, array, i):
     """
         Unconditional branch. It jumps to the ith instruction of the assembly code array.
     """
-    for j in range(0, len(array)):
-        j = j + 1
+    i = 0
+    for j in range(len(array)):
         if array[j] == label:
+            i = j + 1
             break
-    i = j
     return i
 
 
-def be(label, array, i):
+def BE(label, array, i):
     """
         branch if equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 1.
     """
@@ -577,74 +867,79 @@ def be(label, array, i):
     return i
 
 
-def bne(label, array, i):
+def BNE(label, array, i):
     """
         branch if not equal. It jumps to the ith instruction of the assembly code array if Z flag is set to 0.
     """
     if registers.Z == 0:
-        for j in range(0, len(array)):
-            i = i + 1
-            if array[i] == label:
+        i = 0
+        for j in range(len(array)):
+            if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1
     return i
 
 
-def bge(label, array, i):
+def BGE(label, array, i):
     """
         branch if greater than or equal. It jumps to the ith instruction of the assembly code array if N flag is set
         to 0 or the Z flag is set to 1.
     """
     if registers.Z == 1 or registers.N == 0:
-        for j in range(0, len(array)):
-            i = i + 1
-            if array[i] == label:
+        i = 0
+        for j in range(len(array)):
+            if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1
     return i
 
 
-def bgt(label, array, i):
+def BGT(label, array, i):
     """
         branch if greater than. It jumps to the ith instruction of the assembly code array if N flag is set
         to 0.
     """
     if registers.N == 0:
-        for j in range(0, len(array)):
-            i = i + 1
-            if array[i] == label:
+        i = 0
+        for j in range(len(array)):
+            if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1
     return i
 
 
-def ble(label, array, i):
+def BLE(label, array, i):
     """
         branch if less than or equal. It jumps to the ith instruction of the assembly code array if N flag is set
         to 1 or the Z flag is set to 1.
     """
     if registers.Z == 1 or registers.N == 1:
-        for j in range(0, len(array)):
-            i = i + 1
-            if array[i] == label:
+        i = 0
+        for j in range(len(array)):
+            if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1
     return i
 
 
-def blt(label, array, i):
+def BLT(label, array, i):
     """
         branch if less than. It jumps to the ith instruction  of the assembly code array if N flag is set
         to 1.
     """
     if registers.N == 1:
-        for j in range(0, len(array)):
-            i = i + 1
-            if array[i] == label:
+        i = 0
+        for j in range(len(array)):
+            if array[j] == label:
+                i = j + 1
                 break
     else:
         i = i + 1
