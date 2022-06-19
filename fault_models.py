@@ -2,7 +2,6 @@ import registers
 import useful_functions
 import math
 from assembly import *
-from capstone import *
 
 
 def changing_argument(i, j):
@@ -33,7 +32,7 @@ def changing_argument(i, j):
 
 def skip(array):
     """
-        This function executes the skip fault model.
+        This function simulates the skip fault model.
 
             :parameter :
                 array (array) : an array of assembly code
@@ -130,7 +129,7 @@ def one_instruction_corruption(array):
             i = i + 1
 
 
-def two_instruction_corruption(array):
+def two_instruction_corruption_32(array):
     """
         This function executes the two instructions corruption.
         The destination and second source operands of an instruction i are replaced with those of the instruction i-1.
@@ -192,7 +191,7 @@ def two_instruction_corruption(array):
             useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
-            header = "TwoInstructionsCorruption,First_" + str(
+            header = "32TwoInstructionsCorruption,First_" + str(
                 i + 1) + "_Second_" + str(
                 i + 2)  # The header is in the form "TwoInstructionsCorruption,First_" the number of the first
             # corrupted function , second , index of second corrupted one
@@ -247,7 +246,7 @@ def repeating(array, index_repeat, number_to_repeat):
 
 def skip_and_repeat(array):
     """
-            This function executes the skip and repeat fault model.
+            This function simulates the skip and repeat fault model.
 
                 :parameter :
                     array (array) : an array of assembly code
@@ -300,6 +299,13 @@ def skip_and_repeat(array):
 
 
 def destination_corruption(array):
+    """
+        This function simulates the destination operand corruption.
+
+            :parameter :
+                array (array) : an array of assembly code
+
+    """
     i = 0
     while i < len(array) - 1:
         copy_array = array.copy()
@@ -330,6 +336,13 @@ def destination_corruption(array):
 
 
 def first_source_operand_replacement(array):
+    """
+        This function simulates the first source operand corruption.
+
+            :parameter :
+                array (array) : an array of assembly code
+
+    """
     i = 0
     while i < len(array) - 1:
         copy_array = array.copy()
@@ -364,6 +377,13 @@ def first_source_operand_replacement(array):
 
 
 def second_source_operand_replacement(array):
+    """
+        This function simulates the second source operand corruption.
+
+            :parameter :
+                array (array) : an array of assembly code
+
+    """
     i = 0
     while i < len(array) - 1:
         copy_array = array.copy()
@@ -403,95 +423,116 @@ def second_source_operand_replacement(array):
             i = i + 1
 
 
-def CorruptionandNewExcecution(array):
+def skip_and_new_execution(array):
+    """
+        This function simulates the one instruction skip and one instruction corruption model.
+
+            :parameter :
+                array (array) : an array of assembly code
+
+    """
+    # First we have to initialize the number of instructions that we will skip to 1.
     number_of_instruction_skipped = 1
+
+    # In this case we can skip all the instructions since we will execute a new one.
     while number_of_instruction_skipped <= len(array):
-        index_frst_skipped = 0
-        while index_frst_skipped + number_of_instruction_skipped < len(array):
+
+        index_frst_skipped = 0  # The first instruction we will start skipping is the first one
+
+        # The maximum index we can reach is the total number of instructions minus the number of instructions skipped
+        while index_frst_skipped + number_of_instruction_skipped <= len(array):
+            # We make a copy of our initial array containing the assembly instructions
             copy_array = array.copy()
-            # If one of the three successive instructions has less than 3 arguments we can not apply the model.
-            if array[index_frst_skipped + number_of_instruction_skipped].find(',') < 0:
+
+            #  The last instruction we skip should be a 32-bit instruction, we ignore branches and labels as well.
+            if array[index_frst_skipped + number_of_instruction_skipped - 1].find(
+                    ',') < 0 or useful_functions.is_16_bit(
+                array[index_frst_skipped + number_of_instruction_skipped - 1]):
                 index_frst_skipped = index_frst_skipped + 1
+
             else:
-                import keystone as ks
-                assembly = copy_array[index_frst_skipped + number_of_instruction_skipped].replace('(', ' ')
-                ARM_CODE = assembly.replace(')', ' ')
-                # initialize the keystone object with the ARM architecture
-                ks = ks.Ks(ks.KS_ARCH_ARM, ks.KS_MODE_THUMB + ks.KS_MODE_BIG_ENDIAN)
-                # Assemble the ARM code
-                ARM_BYTECODE, _ = ks.asm(ARM_CODE)
-                # convert the array of integers into bytes
-                ARM_BYTECODE = bytes(ARM_BYTECODE)
+                # Changing the assembly instruction to its encoding
+                ARM_BYTECODE = useful_functions.assembly_to_encoding(
+                    copy_array[index_frst_skipped + number_of_instruction_skipped - 1])
                 ARM_BYTECODE = ARM_BYTECODE[2: 4]
-                md = Cs(CS_ARCH_ARM, CS_MODE_BIG_ENDIAN + CS_MODE_THUMB)
-                for j in md.disasm(ARM_BYTECODE, 0x1000):
-                    argument = j.op_str.split(',')
-                    if argument[2].find('0x') > 0:
-                        argument[2] = str(int(argument[2][2:], 16))
-                    else:
-                        argument[2] = (argument[2][2:])
-                    new = j.mnemonic + '(' + ",".join(argument) + ')'
-                    del copy_array[index_frst_skipped: index_frst_skipped + number_of_instruction_skipped + 1]
-                    copy_array.insert(index_frst_skipped, new)
-                    header = "Skipping_" + str(number_of_instruction_skipped + 1)
-                    # Updating the registers and the flags with their initial values
-                    registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
-                    useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
-                    # Executing the new formed code
-                    copy_array = [each_string.upper() for each_string in copy_array]
+                # Executing the instruction formed with the least 16-bit of the last instruction skipped
+                new_assembly = useful_functions.encoding_to_assembly(ARM_BYTECODE)
 
-                    useful_functions.execute_assembly(copy_array)
-                    useful_functions.fault_simulation_output(header)
+                # Deleting the instructions that should be skipped
+                del copy_array[index_frst_skipped: index_frst_skipped + number_of_instruction_skipped]
+                # Inserting the new instruction formed
+                copy_array.insert(index_frst_skipped, new_assembly)
+
+                header = "Skipping_" + str(number_of_instruction_skipped) + "_indexOfFirst_" + str(index_frst_skipped)
+
+                # Updating the registers and the flags with their initial values
+                registers.initialize()
+                array_initialisation = useful_functions.file_to_array(
+                    'initialisation.txt')  # Creating a list of instructions
+                useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
+
+                # Executing the new formed code
+                copy_array = [each_string.upper() for each_string in copy_array]
+                useful_functions.execute_assembly(copy_array)
+                useful_functions.fault_simulation_output(header)
 
                 index_frst_skipped = index_frst_skipped + 1
         number_of_instruction_skipped = number_of_instruction_skipped + 1
 
 
-def twoCorruption(array):
-    number_of_instruction_skipped = 1
-    while number_of_instruction_skipped <= len(array):
-        index_frst_skipped = 0
-        while index_frst_skipped + number_of_instruction_skipped < len(array):
-            copy_array = array.copy()
-            # If one of the three successive instructions has less than 3 arguments we can not apply the model.
-            if array[index_frst_skipped + number_of_instruction_skipped].find(',') < 0:
-                index_frst_skipped = index_frst_skipped + 1
-            else:
-                import keystone as ks
-                assembly = copy_array[index_frst_skipped + number_of_instruction_skipped].replace('(', ' ')
-                ARM_CODE = assembly.replace(')', ' ')
-                # initialize the keystone object with the ARM architecture
-                ks = ks.Ks(ks.KS_ARCH_ARM, ks.KS_MODE_THUMB + ks.KS_MODE_BIG_ENDIAN)
-                # Assemble the ARM code
-                ARM_BYTECODE, _ = ks.asm(ARM_CODE)
-                # convert the array of integers into bytes
-                ARM_BYTECODE = bytes(ARM_BYTECODE)
-                ARM_BYTECODE = ARM_BYTECODE[2: 4]
-                md = Cs(CS_ARCH_ARM, CS_MODE_BIG_ENDIAN + CS_MODE_THUMB)
-                for j in md.disasm(ARM_BYTECODE, 0x1000):
-                    argument = j.op_str.split(',')
-                    if argument[2].find('0x') > 0:
-                        argument[2] = str(int(argument[2][2:], 16))
-                    else:
-                        argument[2] = (argument[2][2:])
-                    new = j.mnemonic + '(' + ",".join(argument) + ')'
-                    del copy_array[index_frst_skipped: index_frst_skipped + number_of_instruction_skipped + 1]
-                    copy_array.insert(index_frst_skipped, new)
-                    header = "Skipping_" + str(number_of_instruction_skipped + 1)
-                    # Updating the registers and the flags with their initial values
-                    registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
-                    useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
+def two_instruction_corruption_16(array):
+    """
+        This function simulates two instruction corruption model.
+        In this case, the repeated 16 bits  which is originally 16-bit instruction, is going to be part of a 32-
+        bit instruction since it requires a 32-bit instruction to be executed (the most significant five bits
+        are 0b11110).
 
-                    # Executing the new formed code
-                    copy_array = [each_string.upper() for each_string in copy_array]
+            :parameter :
+                array (array) : an array of assembly code
 
-                    useful_functions.execute_assembly(copy_array)
-                    useful_functions.fault_simulation_output(header)
+    """
+    # Initializing the index of the 16-bit instruction as 0
+    index_16_bit = 0
 
-                index_frst_skipped = index_frst_skipped + 1
-        number_of_instruction_skipped = number_of_instruction_skipped + 1
+    while index_16_bit <= len(array) - 3:
+        copy_array = array.copy()
+
+        # This model requires a 16-bit instruction followed by two 32-bit instruction
+        if (useful_functions.is_16_bit(array[index_16_bit]) == False) or useful_functions.is_16_bit(
+                array[index_16_bit + 1]) or useful_functions.is_16_bit(array[index_16_bit + 2]):
+            index_16_bit = index_16_bit + 1
+        else:
+            # Getting the encoding of the three instructions
+            encoding_16_bit = useful_functions.assembly_to_encoding(array[index_16_bit])
+            encoding_first_32 = useful_functions.assembly_to_encoding(array[index_16_bit + 1])
+            encoding_second_32 = useful_functions.assembly_to_encoding(array[index_16_bit + 2])
+
+            # Corrupting the encoding of the two 32-bit instructions
+            encoding_first_32 =  encoding_first_32[0:2] + encoding_16_bit
+            encoding_second_32 = encoding_first_32[0:2] + encoding_second_32[2:4]
+
+            # Changing the corrupted instructions from encoding to arm instructions
+            first_corrupted = useful_functions.encoding_to_assembly(encoding_first_32)
+            second_corrupted = useful_functions.encoding_to_assembly(encoding_second_32)
+
+            # Deleting the old two 32-bit instructions
+            del copy_array[index_16_bit+1 : index_16_bit+3]
+            # Inserting the new formed instructions
+            copy_array.insert(index_16_bit+1, first_corrupted)
+            copy_array.insert(index_16_bit + 2, second_corrupted)
+
+            # The header is in the form " 16twoInstructionCorruption_" + index of the 16 bit instruction
+            header = "16twoInstructionCorruption_" + str(index_16_bit)
+
+            # Updating the registers and the flags with their initial values
+            registers.initialize()
+            array_initialisation = useful_functions.file_to_array(
+                'initialisation.txt')  # Creating a list of instructions
+            useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
+
+            # Executing the new formed code
+            copy_array = [each_string.upper() for each_string in copy_array]
+            useful_functions.execute_assembly(copy_array)
+            useful_functions.fault_simulation_output(header)
+            index_16_bit = index_16_bit +1

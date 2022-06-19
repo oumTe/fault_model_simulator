@@ -2,6 +2,7 @@
 
 from assembly import *
 import registers
+from capstone import *
 import pandas as pd
 
 
@@ -75,6 +76,40 @@ def update_assembly_code(assembly_code):
     return updated_code
 
 
+def assembly_to_encoding(assembly):
+    import keystone as ks
+    ARM_CODE = assembly.replace('(', ' ')
+    ARM_CODE = ARM_CODE.replace(')', ' ')
+    # initialize the keystone object with the ARM architecture
+    ks = ks.Ks(ks.KS_ARCH_ARM, ks.KS_MODE_THUMB + ks.KS_MODE_BIG_ENDIAN)
+    # Assemble the ARM code
+    ARM_BYTECODE, _ = ks.asm(ARM_CODE)
+    # convert the array of integers into bytes
+    ARM_BYTECODE = bytes(ARM_BYTECODE)
+    return ARM_BYTECODE
+
+
+def is_16_bit(assembly):
+    ARM_BYTECODE = assembly_to_encoding(assembly)
+    return len(ARM_BYTECODE) == 2
+
+
+def encoding_to_assembly(ARM_BYTECODE):
+    md = Cs(CS_ARCH_ARM, CS_MODE_BIG_ENDIAN + CS_MODE_THUMB)
+    for j in md.disasm(ARM_BYTECODE, 0x1000):
+        argument = j.op_str.split(',')
+        if argument[2].find('0x') > 0:
+            argument[2] = str(int(argument[2][2:], 16))
+        else:
+            argument[2] = (argument[2][2:])
+
+        opcode = j.mnemonic
+        if opcode.find('.w') >= 0:
+            opcode = opcode.replace('.w','')
+        arm_code = opcode + '(' + ",".join(argument) + ')'
+        return arm_code
+
+
 def execute_assembly(array):
     """
             This function runs the assembly code contained in an array and appends the output to a csv file with
@@ -114,4 +149,3 @@ def fault_simulation_output(header):
     # Adding the output to the csv file
     df[header] = l
     df.to_csv('output.csv', mode='w', index=False)
-
