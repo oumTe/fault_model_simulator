@@ -235,17 +235,17 @@ def ADDS(Rd, Rn, n):
 
     """
     m = Rn + n
+    if m > 2147483647 or m < -2147483648:
+        registers.C = 1
+    elif not (m > 2147483647 or m < -2147483648):
+        registers.C = 0
 
+    Rd = np.int32(m)
     if (Rn > 0 and n > 0 and m < 0) or (Rn < 0 and n < 0 and m > 0):
         registers.V = 1
     elif not ((Rn > 0 and n > 0 and m < 0) or (Rn < 0 and n < 0 and m > 0)):
         registers.V = 0
 
-    if m > 2147483647 or m < -2147483648:
-        registers.C = 1
-    elif not (m > 2147483647 or m < -2147483648):
-        registers.C = 0
-    Rd = np.int32(m)
     if m < 0:
         registers.N = 1
         registers.Z = 0
@@ -290,14 +290,16 @@ def SUBS(Rd, Rn, n):
 
     """
     m = Rn - n
-    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
-        registers.V = 1
-    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
-        registers.V = 0
     if m > 2147483647 or m < -2147483648:
         registers.C = 1
     elif not (m > 2147483647 or m < -2147483648):
         registers.C = 0
+
+    Rd = np.int32(m)
+    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
+        registers.V = 0
     if m < 0:
         registers.N = 1
         registers.Z = 0
@@ -306,7 +308,6 @@ def SUBS(Rd, Rn, n):
         registers.Z = 0
     if m == 0:
         registers.Z = 1
-    Rd = np.int32(m)
     return Rd
 
 
@@ -459,6 +460,7 @@ def ORRS(Rd, Rn):
         registers.Z = 1
     return Rd
 
+
 def ERO(Rd, Rn):
     """ Writes to the register Rd the result obtained after performing a bitwise XOR between Rd and Rn.
 
@@ -473,6 +475,7 @@ def ERO(Rd, Rn):
     Rd ^= Rn
     Rd = np.int32(Rd)
     return Rd
+
 
 def EROS(Rd, Rn):
     """ Writes to the register Rd the result obtained after performing a bitwise XOR between Rd and Rn.
@@ -499,7 +502,6 @@ def EROS(Rd, Rn):
     return Rd
 
 
-
 def MVN(Rd, Rn):
     """ Writes to the register Rd the r 1’s complement of Rn.
 
@@ -514,6 +516,7 @@ def MVN(Rd, Rn):
     Rd = Rn ^ 0xffffffff
     Rd = np.int32(Rd)
     return Rd
+
 
 def MVNS(Rd, Rn):
     """ Writes to the register Rd the r 1’s complement of Rn.
@@ -554,6 +557,7 @@ def BIC(Rd, Rn):
     Rd = np.int32(Rd)
     return Rd
 
+
 def BICS(Rd, Rn):
     """  Bit clear Rd using mask in Rn and updates the flags.
 
@@ -577,6 +581,7 @@ def BICS(Rd, Rn):
         registers.Z = 1
     return Rd
 
+
 ######################################################################################################################
 """Shift and rotation instructions"""
 
@@ -593,6 +598,7 @@ def LSL(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
+    imm = imm % 32
     Rd = Rn << imm
     Rd = np.int32(Rd)
     return Rd
@@ -610,8 +616,9 @@ def LSLS(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = Rn  << imm
-    if imm != 0 :
+    imm = imm % 32
+    Rd = np.int32(Rn << imm)
+    if imm != 0:
         if Rd > 2147483647 or Rd < -2147483648:
             registers.C = 1
         elif not (Rd > 2147483647 or Rd < -2147483648):
@@ -628,7 +635,6 @@ def LSLS(Rd, Rn, imm):
     return Rd
 
 
-
 def LSR(Rd, Rn, imm):
     """  Writes to Rd the result of right shifting Rn by imm bits.
 
@@ -641,6 +647,8 @@ def LSR(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
+    imm = imm % 32
+    Rn = np.uint32(Rn)
     Rd = Rn >> imm
     Rd = np.int32(Rd)
     return Rd
@@ -658,8 +666,9 @@ def LSRS(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = Rn  >> imm
-    if imm != 0 :
+    imm = imm % 32
+    Rd = np.uint32(Rn) >> imm
+    if imm != 0:
         if Rd > 2147483647 or Rd < -2147483648:
             registers.C = 1
         elif not (Rd > 2147483647 or Rd < -2147483648):
@@ -673,6 +682,7 @@ def LSRS(Rd, Rn, imm):
         registers.Z = 0
     if Rd == 0:
         registers.Z = 1
+    Rd = np.int32(Rd)
     return Rd
 
 
@@ -688,7 +698,8 @@ def ASR(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = (Rn & 0xffffffff) >> imm
+    Rd = Rn >> imm
+    imm = imm % 32
     Rd = np.int32(Rd)
     return Rd
 
@@ -705,7 +716,8 @@ def ROR(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = (Rn >> imm) | (Rn << (32 - imm)) & 0xFFFFFFFF
+    imm = imm % 32
+    Rd = ((Rn & (2**32-1)) >> imm) | (Rn << (32-(imm)) & (2**32-1))
     Rd = np.int32(Rd)
     return Rd
 
@@ -722,7 +734,8 @@ def ROL(Rd, Rn, imm):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = (Rn << imm) | (Rn >> (32 - imm))
+    imm = imm%32
+    Rd = (Rn << imm) & (2**32-1) | ((Rn & (2**32-1)) >> (32-imm))
     Rd = np.int32(Rd)
     return Rd
 
@@ -763,14 +776,15 @@ def CMP(Rn, n):
 
     """
     m = Rn - n
-    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
-        registers.V = 1
-    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
-        registers.V = 0
     if m > 2147483647 or m < -2147483648:
         registers.C = 1
     elif not (m > 2147483647 or m < -2147483648):
         registers.C = 0
+    m = np.int32(m)
+    if (Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and n < 0 and m < 0) or (Rn < 0 and n > 0 and m > 0)):
+        registers.V = 0
     if m < 0:
         registers.N = 1
         registers.Z = 0
@@ -779,7 +793,6 @@ def CMP(Rn, n):
         registers.Z = 0
     if m == 0:
         registers.Z = 1
-
     return Rn
 
 
@@ -794,14 +807,15 @@ def CMN(Rn, Rm):
 
     """
     m = Rn + Rm
-    if (Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0):
-        registers.V = 1
-    elif not ((Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0)):
-        registers.V = 0
     if m > 2147483647 or m < -2147483648:
         registers.C = 1
     elif not (m > 2147483647 or m < -2147483648):
         registers.C = 0
+    m = np.int32(m)
+    if (Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0):
+        registers.V = 1
+    elif not ((Rn > 0 and Rm > 0 and m < 0) or (Rn < 0 and Rm < 0 and m > 0)):
+        registers.V = 0
     if m < 0:
         registers.N = 1
     elif m > 0:
