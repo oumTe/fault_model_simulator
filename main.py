@@ -38,5 +38,5 @@ fault_models.corrupt_skip_repeat(assembly_code)
 fault_models.corrupt_skip_repeat_16(assembly_code)
 
 # """Comparing results"""
-comparing_results.comparing_results()
+# comparing_results.comparing_results()
 
