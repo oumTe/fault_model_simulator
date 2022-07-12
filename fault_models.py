@@ -5,7 +5,7 @@ from assembly import *
 import signal
 
 
-def skip(array):
+def skip(array , array_initialisation):
     """
         This function simulates the skip fault model.
 
@@ -31,18 +31,13 @@ def skip(array):
                 for index in list_of_index:
                     copy_lines[index] = "MOV(R0,R0)"
 
-                print('---------------------------------------------')
                 # The header will be in format skip_NumberOfInstructionsSkipped_IndexOfFirstInstructionSkipped
                 header = 'skip_' + str(j) + '_' + str(i)
 
                 """ Updating the registers and the flags with their initial values"""
                 registers.initialize()
-                array_initialisation = useful_functions.file_to_array(
-                    'initialisation.txt')  # Creating a list of instructions
                 useful_functions.execute_assembly(array_initialisation)  # Executing the instructions
 
-                print('---------------------------------------------')
-                print(header)
                 """Executing the skip"""
                 useful_functions.execute_assembly(copy_lines)
                 useful_functions.fault_simulation_output(header)
@@ -58,7 +53,7 @@ def skip(array):
                 pass
 
 
-def one_instruction_corruption(array):
+def one_instruction_corruption(array, array_initialisation):
     """
         This function executes the one instruction corruption model while skipping j instructions.
         In this model we merge the least significant 16 bits of the instruction we corrupt with the most
@@ -107,18 +102,15 @@ def one_instruction_corruption(array):
 
                             # Updating the registers and the flags with their initial values
                             registers.initialize()
-                            array_initialisation = useful_functions.file_to_array(
-                                'initialisation.txt')  # Creating a list of instructions
                             useful_functions.execute_assembly(array_initialisation)
 
                             # Simulating the fault
                             header = "SingleInstructionCorruptionAndSkip_" + str(i) + "_" + str(j)
                             # The header is in the form "SingleInstructionCorruption" the index of the corrupted instruction
                             # "_" number of skipped instructions
-                            print('---------------------------------------------')
-                            print(header)
+
                             useful_functions.execute_assembly(copy_array)
-                            # useful_functions.fault_simulation_output(header)
+                            useful_functions.fault_simulation_output(header)
                         except:
                             header = "CrashSingleInstructionCorruptionAndSkip_" + str(i) + "_" + str(j)
                             useful_functions.fault_simulation_output(header)
@@ -129,7 +121,7 @@ def one_instruction_corruption(array):
             i = i + 1
 
 
-def destination_corruption(array):
+def destination_corruption(array,array_initialisation):
     """
         This function simulates the destination operand corruption.
 
@@ -168,20 +160,17 @@ def destination_corruption(array):
                 copy_array[index_of_corrupted[0]] = corrupted_instruction
                 # Updating the registers and the flags with their initial values
                 registers.initialize()
-                array_initialisation = useful_functions.file_to_array(
-                    'initialisation.txt')  # Creating a list of instructions
                 useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                 # Executing the new formed code
                 header = "DestinationOperandCorruption_" + str(index_of_corrupted[0])
-                print('------------------------\n', header)
                 useful_functions.execute_assembly(copy_array)
                 useful_functions.fault_simulation_output(header)
 
             i = i + 1
 
 
-def first_source_operand_replacement(array):
+def first_source_operand_replacement(array, array_initialisation):
     """
         This function simulates the destination operand corruption.
 
@@ -225,13 +214,10 @@ def first_source_operand_replacement(array):
 
                     # Updating the registers and the flags with their initial values
                     registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
                     useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                     # Executing the new formed code
                     header = "FirstSourceOperandCorruption_" + str(index_of_corrupted[0])
-                    print('------------------------\n', header)
                     useful_functions.execute_assembly(copy_array)
                     useful_functions.fault_simulation_output(header)
                     i = i + 1
@@ -250,13 +236,10 @@ def first_source_operand_replacement(array):
 
                     # Updating the registers and the flags with their initial values
                     registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
                     useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                     # Executing the new formed code
                     header = "SourceOperandReplacement_" + str(index_of_corrupted[0])
-                    print('------------------------\n', header)
                     useful_functions.execute_assembly(copy_array)
                     useful_functions.fault_simulation_output(header)
                     i = i + 1
@@ -266,7 +249,7 @@ def first_source_operand_replacement(array):
                 i = i + 1
 
 
-def second_source_operand_replacement(array):
+def second_source_operand_replacement(array, array_initialisation):
     """
         This function simulates the destination operand corruption.
 
@@ -309,13 +292,10 @@ def second_source_operand_replacement(array):
 
                     # Updating the registers and the flags with their initial values
                     registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
                     useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                     # Executing the new formed code
                     header = "SecondSourceOperandCorruption_" + str(index_of_corrupted[0])
-                    print('------------------------\n', header)
                     useful_functions.execute_assembly(copy_array)
                     useful_functions.fault_simulation_output(header)
                     i = i + 1
@@ -332,13 +312,10 @@ def second_source_operand_replacement(array):
 
                     # Updating the registers and the flags with their initial values
                     registers.initialize()
-                    array_initialisation = useful_functions.file_to_array(
-                        'initialisation.txt')  # Creating a list of instructions
                     useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                     # Executing the new formed code
                     header = "SecondSourceOperandCorruption_" + str(index_of_corrupted[0])
-                    print('------------------------\n', header)
                     useful_functions.execute_assembly(copy_array)
                     useful_functions.fault_simulation_output(header)
                     i = i + 1
@@ -350,7 +327,7 @@ def second_source_operand_replacement(array):
                 i = i + 1
 
 
-def skip_and_new_execution(array):
+def skip_and_new_execution(array, array_initialisation):
     """
             This function simulates the one instruction skip and one instruction corruption model. We skip multiple
             instructions, and executes the instruction formed with the least 16-bit of the last skipped instruction.
@@ -402,18 +379,14 @@ def skip_and_new_execution(array):
 
                             # Updating the registers and the flags with their initial values
                             registers.initialize()
-                            array_initialisation = useful_functions.file_to_array(
-                                'initialisation.txt')  # Creating a list of instructions
                             useful_functions.execute_assembly(array_initialisation)
 
                             # Simulating the fault
                             header = "SkipNewExecute_" + str(i) + "_" + str(j)
                             # The header is in the form "SingleInstructionCorruption" the index of the corrupted
                             # instruction "_" number of skipped instructions
-                            print('---------------------------------------------')
-                            print(header)
                             useful_functions.execute_assembly(copy_array)
-                            # useful_functions.fault_simulation_output(header)
+                            useful_functions.fault_simulation_output(header)
                         except:
                             header = "Crash_SingleInstructionCorruptionAndSkip_" + str(i) + "_" + str(j)
                             useful_functions.fault_simulation_output(header)
@@ -424,7 +397,7 @@ def skip_and_new_execution(array):
             i = i + 1
 
 
-def instruction_to_mov(array):
+def instruction_to_mov(array,array_initialisation):
     """
     In this model we corrupt one instruction by changing it to mov(destination_operand, R0)
     """
@@ -447,18 +420,15 @@ def instruction_to_mov(array):
 
             # Updating the registers and the flags with their initial values
             registers.initialize()
-            array_initialisation = useful_functions.file_to_array(
-                'initialisation.txt')  # Creating a list of instructions
             useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
             copy_array = [each_string.upper() for each_string in copy_array]
-            print('--------------\n', header)
             useful_functions.execute_assembly(copy_array)
             useful_functions.fault_simulation_output(header)
 
 
-def corrupting_by_adding_zeros_last_32(array):
+def corrupting_by_adding_zeros_last_32(array,array_initialisation):
     """
         This function executes the one instruction corruption model while skipping j instructions.
         In this model we merge the least significant 16 bits of the instruction we corrupt with the most
@@ -518,19 +488,15 @@ def corrupting_by_adding_zeros_last_32(array):
 
                             # Updating the registers and the flags with their initial values
                             registers.initialize()
-                            array_initialisation = useful_functions.file_to_array(
-                                'initialisation.txt')  # Creating a list of instructions
                             useful_functions.execute_assembly(array_initialisation)
 
                             # Simulating the fault
-
                             header = "corruptingByAddingZerosLast32_" + str(i) + "_" + str(j)
                             # The header is in the form "corruptingByAddingZerosLast32" the index of the corrupted
                             # instruction "_" number of skipped instructions
-                            print('---------------------------------------------')
-                            print(header)
+
                             useful_functions.execute_assembly(copy_array)
-                            # useful_functions.fault_simulation_output(header)
+                            useful_functions.fault_simulation_output(header)
                         except:
                             header = "CrashCorruptingByAddingZerosLast32_" + str(i) + "_" + str(j)
                             useful_functions.fault_simulation_output(header)
@@ -541,7 +507,7 @@ def corrupting_by_adding_zeros_last_32(array):
             i = i + 1
 
 
-def corrupting_by_adding_zeros_last_16(array):
+def corrupting_by_adding_zeros_last_16(array, array_initialisation):
     """
         This function executes the one instruction corruption model while skipping j instructions.
         In this model we merge the least significant 16 bits of the instruction we corrupt with the most
@@ -587,8 +553,6 @@ def corrupting_by_adding_zeros_last_16(array):
 
                         # Updating the registers and the flags with their initial values
                         registers.initialize()
-                        array_initialisation = useful_functions.file_to_array(
-                            'initialisation.txt')  # Creating a list of instructions
                         useful_functions.execute_assembly(array_initialisation)
 
                         # Simulating the fault
@@ -596,10 +560,8 @@ def corrupting_by_adding_zeros_last_16(array):
                         header = "corruptingByAddingZerosLast16_" + str(i) + "_" + str(j)
                         # The header is in the form "corruptingByAddingZerosLast32" the index of the corrupted
                         # instruction "_" number of skipped instructions
-                        print('---------------------------------------------')
-                        print(header)
                         useful_functions.execute_assembly(copy_array)
-                        # useful_functions.fault_simulation_output(header)
+                        useful_functions.fault_simulation_output(header)
                     except:
                         header = "CrashCorruptingByAddingZerosLast16_" + str(i) + "_" + str(j)
                         useful_functions.fault_simulation_output(header)
@@ -610,7 +572,7 @@ def corrupting_by_adding_zeros_last_16(array):
             i = i + 1
 
 
-def two_instruction_corruption_32(array):
+def two_instruction_corruption_32(array, array_initialisation):
     """
         This function executes the two instructions corruption.
         The destination and second source operands of an instruction i are replaced with those of the instruction i-1.
@@ -667,8 +629,6 @@ def two_instruction_corruption_32(array):
 
             # Updating the registers and the flags with their initial values
             registers.initialize()
-            array_initialisation = useful_functions.file_to_array(
-                'initialisation.txt')  # Creating a list of instructions
             useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
@@ -676,14 +636,12 @@ def two_instruction_corruption_32(array):
                 i + 1) + "_Second_" + str(
                 i + 2)  # The header is in the form "TwoInstructionsCorruption,First_" the number of the first
             # corrupted function , second , index of second corrupted one
-            print('---------------------------------------------')
-            print(header)
             useful_functions.execute_assembly(copy_array)
             useful_functions.fault_simulation_output(header)
             i = i + 1
 
 
-def two_instruction_corruption_16(array):
+def two_instruction_corruption_16(array, array_initialisation):
     """
         This function simulates two instruction corruption model.
         In this case, the repeated 16 bits  which is originally 16-bit instruction, is going to be part of a 32-
@@ -734,8 +692,6 @@ def two_instruction_corruption_16(array):
 
             # Updating the registers and the flags with their initial values
             registers.initialize()
-            array_initialisation = useful_functions.file_to_array(
-                'initialisation.txt')  # Creating a list of instructions
             useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
             # Executing the new formed code
@@ -745,7 +701,7 @@ def two_instruction_corruption_16(array):
             index_16_bit = index_16_bit + 1
 
 
-def corrupt_skip_repeat(array):
+def corrupt_skip_repeat(array, array_initialisation):
     number_skip = 0
     # The minimum number of instructions repeated is the half of the number of instructions skipped
     while number_skip <= len(array) - math.ceil(number_skip/2) + 2:
@@ -812,8 +768,6 @@ def corrupt_skip_repeat(array):
 
                                         # Updating the registers and the flags with their initial values
                                         registers.initialize()
-                                        array_initialisation = useful_functions.file_to_array(
-                                            'initialisation.txt')  # Creating a list of instructions
                                         useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                                         # Executing the new formed code
@@ -823,7 +777,6 @@ def corrupt_skip_repeat(array):
                                         signal.signal(signal.SIGALRM, useful_functions.handler)
                                         signal.alarm(1)
                                         try:
-                                            print('--------', header)
                                             useful_functions.execute_assembly(copy_array)
                                             useful_functions.fault_simulation_output(header)
 
@@ -836,11 +789,13 @@ def corrupt_skip_repeat(array):
                                         header = "CrashCorruptSkipRepeat_" + str(number_skip) + "_" + str(
                                             index_corrupted) + "_" + str(index_first_repeated) + "_" + str(index_last_skipped)
                                         useful_functions.fault_simulation_output(header)
+                                    signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
             index_corrupted = index_corrupted + 1
         number_skip = number_skip + 1
 
 
-def corrupt_skip_repeat_16(array):
+def corrupt_skip_repeat_16(array, array_initialisation):
     number_skip = 0
     # The minimum number of instructions repeated is the half of the number of instructions skipped
     while number_skip <= len(array) - math.ceil(number_skip/2) + 2:
@@ -907,8 +862,6 @@ def corrupt_skip_repeat_16(array):
 
                                         # Updating the registers and the flags with their initial values
                                         registers.initialize()
-                                        array_initialisation = useful_functions.file_to_array(
-                                            'initialisation.txt')  # Creating a list of instructions
                                         useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                                         # Executing the new formed code
@@ -918,7 +871,6 @@ def corrupt_skip_repeat_16(array):
                                         signal.signal(signal.SIGALRM, useful_functions.handler)
                                         signal.alarm(1)
                                         try:
-                                            print('--------', header)
                                             useful_functions.execute_assembly(copy_array)
                                             useful_functions.fault_simulation_output(header)
 
@@ -931,11 +883,12 @@ def corrupt_skip_repeat_16(array):
                                         header = "CrashCorruptSkipRepeat16_" + str(number_skip) + "_" + str(
                                             index_corrupted) + "_" + str(index_first_repeated) + "_" + str(index_last_skipped)
                                         useful_functions.fault_simulation_output(header)
+                                    signal.signal(signal.SIGALRM, signal.SIG_IGN)
             index_corrupted = index_corrupted + 1
         number_skip = number_skip + 1
 
 
-def skip_and_repeat(array):
+def skip_and_repeat(array, array_initialisation):
     """
         This function executes the skip and repeat fault model.
 
@@ -991,30 +944,32 @@ def skip_and_repeat(array):
                                                       copy_lines[list_of_index_repeated[index]])
 
                             """ Updating the registers and the flags with their initial values"""
-                            array_initialisation = useful_functions.file_to_array(
-                                'initialisation.txt')  # Creating a list of instructions
+
                             useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                             signal.signal(signal.SIGALRM, useful_functions.handler)
-                            signal.alarm(1)
+                            signal.alarm(3)
                             try:
                                 header = "NumInstrucskipped_" + str(
                                     number_of_instructions_skipped) + "_IndexFirstSkipped_" + str(
                                     index_first_instruction_skipped) + "_NumInstrucRep_" + str(
-                                    number_of_instructions_repeated) + "_IndexFirstRep" + str(
+                                    number_of_instructions_repeated) + "_IndexFirstRep_" + str(
                                     index_first_instruction_repeated)
 
-                                print('--------------------\n', header)
+                                # Updating the registers and the flags with their initial values
+                                registers.initialize()
+                                useful_functions.execute_assembly(array_initialisation)  # Executing the instruction
 
                                 """Executing the skip"""
                                 useful_functions.execute_assembly(copy_lines)
                                 useful_functions.fault_simulation_output(header)
 
                             except:
-                                header = "CrashNumInstrucskipped_" + str(
+                                header = "CrashInfiniteNumInstrucskipped_" + str(
                                     number_of_instructions_skipped) + "_IndexFirstSkipped_" + str(
                                     index_first_instruction_skipped) + "_NumInstrucRep_" + str(
-                                    number_of_instructions_repeated) + "_IndexFirstRep" + str(
+                                    number_of_instructions_repeated) + "_IndexFirstRep_" + str(
                                     index_first_instruction_repeated)
                                 useful_functions.fault_simulation_output(header)
                                 continue
+                            signal.signal(signal.SIGALRM, signal.SIG_IGN)

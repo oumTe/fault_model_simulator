@@ -254,14 +254,12 @@ def execute_assembly(array):
 
     array = [each_string.upper() for each_string in array]
 
-    print(array)
     i = 0
     while i < len(array):
         if array[i].find('(') < 0:  # If the code is a label we do nothing
             i = i + 1
 
         elif array[i].find(',') > 0:  # If the code is an assembly code but not a branch we execute it and increment i.
-            print(update_assembly_code(array[i]))
             exec(update_assembly_code(array[i]))
             i = i + 1
 
