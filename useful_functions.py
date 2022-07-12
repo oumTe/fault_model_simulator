@@ -70,16 +70,15 @@ def update_assembly_code(assembly_code):
         list_of_arguments = get_arguments_of_function(
             assembly_code)  # Creating an array of the assembly function arguments
 
-        for j in range(len(list_of_arguments)):
+        for j in range(min(len(list_of_arguments) , 3)):
             if list_of_arguments[j].isnumeric():  # Verify if the argument is numeric, so we don't have to update it
-                break
+                continue
             else:  # If the argument is not numeric than it is a global variable, and so we have to replace its syntax
                 list_of_arguments[j] = 'registers.' + list_of_arguments[j]
 
         # Updating the syntax
         updated_code = 'registers.' + assembly_code[assembly_code.find('(') + 1: assembly_code.find(',')] + ' = ' \
                        + assembly_code[:assembly_code.find('(')] + '(' + ",".join(list_of_arguments) + ')'
-
     elif assembly_code.find('(') > 0:  # If it is a branch syntax
         updated_code = assembly_code[:assembly_code.find('(')] + '("' + assembly_code[
                                                                         assembly_code.find('(') + 1: len(
@@ -123,6 +122,11 @@ def assembly_to_encoding(assembly):
     :return: encoding of assembly instruction
     """
     import keystone as ks
+    argument = get_arguments_of_function(assembly)
+    if len(argument) > 3 :
+        argument[3] = argument[3] + " #" + argument[4]
+        argument = argument[:4]
+        assembly = assembly[:assembly.find('(') + 1] + ",".join(argument) + ')'
 
     # Some add/sub instructions, when all the operands are registers and the first source operand is identical to the
     # destination operand they are considered in python as 16-bit instruction , so we have to modify them adding ".w'
@@ -137,6 +141,7 @@ def assembly_to_encoding(assembly):
     else:
         ARM_CODE = assembly.replace('(', ' ')
         ARM_CODE = ARM_CODE.replace(')', ' ')
+
 
     # initialize the keystone object with the ARM architecture
     ks = ks.Ks(ks.KS_ARCH_ARM, ks.KS_MODE_THUMB + ks.KS_MODE_BIG_ENDIAN)
@@ -185,11 +190,11 @@ def encoding_to_assembly(ARM_BYTECODE):
         elif argument[0] == 'lr':
             argument[0] = 'r14'
 
-        if argument[2].find('0x') > 0:
+        if argument[2].find('0x') >= 0:
             argument[2] = str(int(argument[2][2:], 16))
         # If the second source operand is in the format "#." then it is an integer we have to just delete the symbol
-        elif argument[2].find('#') > 0:
-            argument[2] = (argument[2][2:])
+        elif argument[2].find('#') >= 0:
+            argument[2] = (argument[2][argument[2].find('#') + 1 :])
         # The only case left, when it is a register we onl delete the extra space and if the register has a name then we
         # convert it to R...
         else:
@@ -213,7 +218,24 @@ def encoding_to_assembly(ARM_BYTECODE):
         # Reformatting the code in the appropriate syntaxe
         if opcode.find('.w') >= 0:
             opcode = opcode.replace('.w', '')
-        arm_code = opcode + '(' + ",".join(argument) + ')'
+        if len(argument) <= 3 :
+            arm_code = opcode + '(' + ",".join(argument) + ')'
+
+        elif len(argument) == 4:
+
+            second_function = argument[3][1:].split(' ')
+
+            if second_function[1].find('0x') > 0:
+                second_function[1] = str(int(second_function[1][2:], 16))
+
+            # If the second source operand is in the format "#." then it is an integer we have to just delete the symbol
+            elif second_function[1].find('#') >= 0:
+                second_function[1] = (second_function[1][second_function[1].find('#') + 1:])
+
+            second = ',' + second_function[0] + ',' + second_function[1]
+            argument = argument[0:3]
+            arm_code = opcode + '(' + ",".join(argument) + second + ')'
+
         return arm_code
 
 
@@ -253,7 +275,6 @@ def execute_assembly(array):
     """
 
     array = [each_string.upper() for each_string in array]
-
     i = 0
     while i < len(array):
         if array[i].find('(') < 0:  # If the code is a label we do nothing
