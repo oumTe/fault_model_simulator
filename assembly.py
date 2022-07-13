@@ -517,7 +517,7 @@ def EROS(Rd, Rn):
 
 
 def MVN(Rd, Rn):
-    """ Writes to the register Rd the r 1’s complement of Rn.
+    """ Writes to the register Rd the first complement of Rn.
 
             Parameters:
                 Rd (register) : The destination ARM register
@@ -533,7 +533,7 @@ def MVN(Rd, Rn):
 
 
 def MVNS(Rd, Rn):
-    """ Writes to the register Rd the r 1’s complement of Rn.
+    """ Writes to the register Rd the first complement of Rn.
 
             Parameters:
                 Rd (register) : The destination ARM register
