@@ -1,5 +1,4 @@
 """Some important functions are included in this file, which we will utilize in the main program."""
-from ast import literal_eval
 from assembly import *
 import registers
 from capstone import *
