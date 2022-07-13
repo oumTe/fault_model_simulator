@@ -205,7 +205,7 @@ def LDRH(Rt, Rn, imm6):
 """Arithmetic instructions"""
 
 
-def ADD(Rd, Rn, n):
+def ADD(Rd, Rn, n , fun=None, imm=None):
     """ Writes to the register Rd the result obtained by adding the immediate value or the register n to the register Rn
 
             Parameters:
@@ -217,9 +217,17 @@ def ADD(Rd, Rn, n):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = Rn + n
-    Rd = np.int32(Rd)
-    return Rd
+    if (fun is None) and (imm is None) :
+        Rd = Rn + n
+        Rd = np.int32(Rd)
+        return Rd
+    else:
+        registers.n = fun(n, n, imm)
+        Rd = Rn + registers.n
+        Rd = np.int32(Rd)
+        return Rd
+
+
 
 
 def ADDS(Rd, Rn, n):
@@ -258,7 +266,7 @@ def ADDS(Rd, Rn, n):
     return Rd
 
 
-def SUB(Rd, Rn, n):
+def SUB(Rd, Rn, n , fun=None, imm=None):
     """ Writes to the register Rd the result obtained by subtracting the immediate value or the register n from
         the register Rn .
 
@@ -271,9 +279,15 @@ def SUB(Rd, Rn, n):
                 (int) : The new value stored in the register Rd
 
     """
-    Rd = Rn - n
-    Rd = np.int32(Rd)
-    return Rd
+    if (fun is None) and (imm is None):
+        Rd = Rn - n
+        Rd = np.int32(Rd)
+        return Rd
+    else:
+        registers.n = fun(n, n, imm)
+        Rd = Rn - registers.n
+        Rd = np.int32(Rd)
+        return Rd
 
 
 def SUBS(Rd, Rn, n):
@@ -958,3 +972,6 @@ def BLT(label, array, i):
     else:
         i = i + 1
     return i
+
+################################################################################
+

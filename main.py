@@ -1,3 +1,4 @@
+import assembly
 import useful_functions
 import registers
 import fault_models
@@ -69,5 +70,4 @@ while True:
         print("This might be a wrong path, please try again.")
     else:
         break
-# comparing_results.comparing_results()
 
