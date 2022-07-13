@@ -6,6 +6,20 @@ from capstone import *
 import pandas as pd
 
 
+def convert_hexa(number):
+    if number.find('0x') >= 0:
+        return int(number,16)
+    else :
+        return int(number)
+
+def is_hex(s):
+    try:
+        int(s, 16)
+        return True
+    except ValueError:
+        return False
+
+
 def file_to_array(file_path):
     """
         This function reads a file, divides it into lines, and returns the array of lines.
@@ -70,15 +84,18 @@ def update_assembly_code(assembly_code):
         list_of_arguments = get_arguments_of_function(
             assembly_code)  # Creating an array of the assembly function arguments
 
-        for j in range(min(len(list_of_arguments) , 3)):
-            if list_of_arguments[j].isnumeric():  # Verify if the argument is numeric, so we don't have to update it
+        for j in range(min(len(list_of_arguments), 3)):
+            if (is_hex(list_of_arguments[j])):  # Verify if the argument is numeric, so we don't have to update it
                 continue
             else:  # If the argument is not numeric than it is a global variable, and so we have to replace its syntax
-                list_of_arguments[j] = 'registers.' + list_of_arguments[j]
+                list_of_arguments[j] = 'registers.' + list_of_arguments[j].upper()
+
+        if len(list_of_arguments) > 3 :
+            list_of_arguments[3] = list_of_arguments[3].upper()
 
         # Updating the syntax
-        updated_code = 'registers.' + assembly_code[assembly_code.find('(') + 1: assembly_code.find(',')] + ' = ' \
-                       + assembly_code[:assembly_code.find('(')] + '(' + ",".join(list_of_arguments) + ')'
+        updated_code = 'registers.' + (assembly_code[assembly_code.find('(') + 1: assembly_code.find(',')]).upper() + ' = ' \
+                       + (assembly_code[:assembly_code.find('(')]).upper() + '(' + ",".join(list_of_arguments) + ')'
     elif assembly_code.find('(') > 0:  # If it is a branch syntax
         updated_code = assembly_code[:assembly_code.find('(')] + '("' + assembly_code[
                                                                         assembly_code.find('(') + 1: len(
@@ -105,12 +122,12 @@ def changing_argument(corrupted, replacement):
 
     # If the operand of the corrupted instruction is an immediate value, while the new value is a register then the
     # index of the register will be considered as an immediate value
-    if corrupted.isnumeric() and replacement.isnumeric() == False:
+    if (is_hex(corrupted)) and (is_hex(replacement) == False):
         replacement = replacement[1:]
 
     # If the operand of the corrupted instruction is a register, while the new value is an immediate value then the
     # immediate value, if it's less than 16, will be considered as the register index
-    if corrupted.isnumeric() == False and replacement.isnumeric() and int(replacement) <= 15:
+    if (is_hex(corrupted) == False) and (is_hex(replacement)) and convert_hexa(replacement) <= 15:
         replacement = "R" + str(replacement)
     return replacement
 
@@ -123,7 +140,7 @@ def assembly_to_encoding(assembly):
     """
     import keystone as ks
     argument = get_arguments_of_function(assembly)
-    if len(argument) > 3 :
+    if len(argument) > 3:
         argument[3] = argument[3] + " #" + argument[4]
         argument = argument[:4]
         assembly = assembly[:assembly.find('(') + 1] + ",".join(argument) + ')'
@@ -141,7 +158,6 @@ def assembly_to_encoding(assembly):
     else:
         ARM_CODE = assembly.replace('(', ' ')
         ARM_CODE = ARM_CODE.replace(')', ' ')
-
 
     # initialize the keystone object with the ARM architecture
     ks = ks.Ks(ks.KS_ARCH_ARM, ks.KS_MODE_THUMB + ks.KS_MODE_BIG_ENDIAN)
@@ -194,7 +210,7 @@ def encoding_to_assembly(ARM_BYTECODE):
             argument[2] = str(int(argument[2][2:], 16))
         # If the second source operand is in the format "#." then it is an integer we have to just delete the symbol
         elif argument[2].find('#') >= 0:
-            argument[2] = (argument[2][argument[2].find('#') + 1 :])
+            argument[2] = (argument[2][argument[2].find('#') + 1:])
         # The only case left, when it is a register we onl delete the extra space and if the register has a name then we
         # convert it to R...
         else:
@@ -218,7 +234,7 @@ def encoding_to_assembly(ARM_BYTECODE):
         # Reformatting the code in the appropriate syntaxe
         if opcode.find('.w') >= 0:
             opcode = opcode.replace('.w', '')
-        if len(argument) <= 3 :
+        if len(argument) <= 3:
             arm_code = opcode + '(' + ",".join(argument) + ')'
 
         elif len(argument) == 4:
@@ -274,7 +290,6 @@ def execute_assembly(array):
                 array (string) : An array of Assembly instructions
     """
 
-    array = [each_string.upper() for each_string in array]
     i = 0
     while i < len(array):
         if array[i].find('(') < 0:  # If the code is a label we do nothing
