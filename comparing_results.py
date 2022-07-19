@@ -156,25 +156,30 @@ def comparing_physical(file):
     fault = fault.T.sort_values(by=delay_row).T  # Sorting the fault injection outcomes by delay
     unique_elements, counts_elements = np.unique(fault.iloc[13, :], return_counts=True)  # Counting the occurrence of
     # each unique delay
-    index = 0
 
+    index = 0
     # Asking the user to provide the number of experiments
     number_of_experiences = input("Please enter the number of experiences: ")
 
+    # Opening a PDF file
     pdf = FPDF()
     pdf.add_page()
 
-    while index < fault.shape[1]:  # Comparing each column of the fault injection CSV file with the output of the
-        # fault simulation
+    # Comparing each column of the fault injection CSV file with the output of the fault simulation
+    while index < fault.shape[1]:
+
         for i in range(len(unique_elements)):  # Grouping the results by delay
 
+            # Writing to the PDF file the delay
             pdf.set_font("Arial", 'B', size=42)
             pdf.set_text_color(143, 221, 231)
             pdf.cell(195, 40, txt='Delay : {}'.format(unique_elements[i]), ln=1, align='C')
 
             crashes = 0  # This variable counts the number of crashes at a specific delay
+
             #  Browsing the fault injection outcomes columns for that specific delay
             for j in range(counts_elements[i]):
+
                 # Incrementing the crashes variable with the number of times the
                 crashes = crashes + fault.loc[14][index]
 
@@ -184,10 +189,10 @@ def comparing_physical(file):
                 # with the simulation results
                 index = index + 1
 
-            crashes = int(number_of_experiences) - crashes  # The number of crushes is the total number of
-            # experiences minus the numer of observed models
+            # The number of crushes is the total number of experiences minus the numer of observed models
+            crashes = int(number_of_experiences) - crashes
 
-            # number of crashes at this delay
+            # Writing to the pdf the number of crashes at this specific delay
             pdf.set_font("Arial", 'I')
             pdf.set_text_color(239, 124, 142)
             pdf.cell(195, 15, 'Crashes at delay = {} equals {}'.format(unique_elements[i], crashes), 0, 1, '')
@@ -236,19 +241,22 @@ def comparing_results_by_line(line, number_of_experiences, pdf):
     else:
         name = ''
 
-        # possible software models that matches with the fault injection
+        # Writing to the pdf the number of possible models that match with this specific physical injection
         pdf.set_font("Arial", 'U', size=15)
         pdf.set_text_color(255, 194, 199)
         pdf.cell(195, 15, 'There are {} possible models for this case:'.format(len(result)), 0, 1, '')
 
         for i in range(len(result)):
+
+            # Numerating the possible models that match in the pdf file
             pdf.set_font("Arial", 'B', 15)
             pdf.set_text_color(182, 229, 216)
             pdf.cell(195, 10, '* Model Number {} :'.format(i + 1), 0, 1, '')
 
-            name = changing_name(result[i])  # Changing the SW model name from the one provided by the python code to
+            # Changing the SW model name from the one provided by the python code to a more detailed one
+            name = changing_name(result[i])
 
-            # a more detailed one
+            # Writing to the report the name of the model
             pdf.set_font("Arial", size=12)
             pdf.set_text_color(0, 0, 0)
             pdf.multi_cell(195, 5, name, 0, 1, '')
@@ -264,15 +272,20 @@ def comparing_results_by_line(line, number_of_experiences, pdf):
 def compare_RTL(RTL_file):
     RTL_outcomes = pd.read_csv(RTL_file, header=None)
     models = pd.read_csv('output.csv')  # Reading the file containing the output of the fault simulation
+    #  Opening a PDF file
     pdf = FPDF()
     pdf.add_page()
+
+    # Changing the format of the rtl file
     for i in range(1, RTL_outcomes.shape[1]):
         index = RTL_outcomes[i].str.find("'")
         for j in range(len(index)):
             RTL_outcomes[i][j] = int(RTL_outcomes[i][j][index[j] + 1:])
 
     for RTL_outcome in range(1, RTL_outcomes.shape[1]):
-        result = []  # Initialize the list that will have the software models with similar results as the fault injection
+
+        # Initialize the list that will have the software models with similar results as the fault injection
+        result = []
 
         for i in range(models.shape[1]):  # Reading the fault models simulation outcomes file by column
             """
