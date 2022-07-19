@@ -167,23 +167,25 @@ def comparing_physical(file):
     while index < fault.shape[1]:  # Comparing each column of the fault injection CSV file with the output of the
         # fault simulation
         for i in range(len(unique_elements)):  # Grouping the results by delay
-            crashes = 0  # This variable counts the number of crashes at a specific delay
 
             pdf.set_font("Arial", 'B', size=42)
             pdf.set_text_color(143, 221, 231)
             pdf.cell(195, 40, txt='Delay : {}'.format(unique_elements[i]), ln=1, align='C')
 
+            crashes = 0  # This variable counts the number of crashes at a specific delay
             #  Browsing the fault injection outcomes columns for that specific delay
             for j in range(counts_elements[i]):
                 # Incrementing the crashes variable with the number of times the
                 crashes = crashes + fault.loc[14][index]
+
                 # model was observed
                 comparing_results_by_line(fault.iloc[:, index], int(number_of_experiences),
                                           pdf)  # Comparing each column
                 # with the simulation results
                 index = index + 1
-                crashes = int(number_of_experiences) - crashes  # The number of crushes is the total number of
-                # experiences minus the numer of observed models
+
+            crashes = int(number_of_experiences) - crashes  # The number of crushes is the total number of
+            # experiences minus the numer of observed models
 
             # number of crashes at this delay
             pdf.set_font("Arial", 'I')
