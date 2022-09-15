@@ -69,6 +69,13 @@ In this model one or more operands are corrupted using the previous instruction.
 In this model an instruction is corrupted by a mov instruction were its source operand is R0. 
 ![image](https://user-images.githubusercontent.com/72249224/190474247-61bc0749-8293-4eeb-90d9-1d8955af5585.png)
 
+
+For more information about the models please refer to : 
+
+https://ieeexplore.ieee.org/abstract/document/9505074
+https://bcolombier.fr/assets/publis_PDF/2022/Alshaer_DSD_2022.pdf
+
+
 ## Running the tool
 This tool is a Linux-based Python script. In order to use it, begin by cloning the github repository or downloading the ZIP code file. 
 
@@ -92,11 +99,4 @@ To use this tool, the main script must be executed. Navigate to the project fold
 **python main.py**. 
 
 Fellow the instruction to perform the analysis and by the end navigate to the code folder to find the report(s) and the csv file containing the software fault model simulation.
-
-
-For more information about the models please refer to : 
-
-https://ieeexplore.ieee.org/abstract/document/9505074
-
-https://bcolombier.fr/assets/publis_PDF/2022/Alshaer_DSD_2022.pdf
 
