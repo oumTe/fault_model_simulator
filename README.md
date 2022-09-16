@@ -100,3 +100,28 @@ To use this tool, the main script must be executed. Navigate to the project fold
 
 Fellow the instruction to perform the analysis and by the end navigate to the code folder to find the report(s) and the csv file containing the software fault model simulation.
 
+## Input Format
+### Prologue File
+
+![image](https://user-images.githubusercontent.com/72249224/190652087-24690527-acc5-4ac5-bc0b-0db30c39680e.png)
+
+
+### Target code File
+
+![image](https://user-images.githubusercontent.com/72249224/190652205-84b24a06-543a-4fbe-a1e3-fa2d991d963c.png)
+
+
+For more information about the assembly syntax, please refer to micropython documentation : https://docs.micropython.org/en/v1.9.3/pyboard/pyboard/tutorial/assembler.html 
+
+### Physical injection outcomes
+
+![image](https://user-images.githubusercontent.com/72249224/190652787-ef4161df-3b49-4f20-96c2-c6d3458003a5.png)
+
+
+### RTL Simulation outcomes
+
+![image](https://user-images.githubusercontent.com/72249224/190652483-6400707c-c4d6-416d-a18a-c0b29124cda9.png)
+
+
+
+
