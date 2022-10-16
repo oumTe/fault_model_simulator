@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 from fpdf import FPDF
 
+crashes = 0
+unknown = 0
+total_models = 0
+silent = 0
 
 def changing_name(name):
     """
@@ -147,6 +151,10 @@ def changing_name(name):
 
 
 def comparing_physical(file):
+    global crashes
+    global unknown
+    global total_models
+    global silent
     """
         This function compares the result contained in two files : the fault models outputs and the fault injection
         output, and returns a list with the fault models that have probably occurred due to the fault injection.
@@ -172,35 +180,51 @@ def comparing_physical(file):
 
             # Writing to the PDF file the delay
             pdf.set_font("Arial", 'B', size=42)
-            pdf.set_text_color(143, 221, 231)
+            pdf.set_text_color(144, 0, 1)
             pdf.cell(195, 40, txt='Delay : {}'.format(unique_elements[i]), ln=1, align='C')
 
             crashes = 0  # This variable counts the number of crashes at a specific delay
+            unknown = 0
+            total_models = 0
+            silent = 0
 
             #  Browsing the fault injection outcomes columns for that specific delay
             for j in range(counts_elements[i]):
 
                 # Incrementing the crashes variable with the number of times the
-                crashes = crashes + fault.loc[14][index]
+                total_models = total_models + fault.loc[14][index]
 
                 # model was observed
                 comparing_results_by_line(fault.iloc[:, index], int(number_of_experiences),
                                           pdf)  # Comparing each column
+
                 # with the simulation results
                 index = index + 1
 
             # The number of crushes is the total number of experiences minus the numer of observed models
-            crashes = int(number_of_experiences) - crashes
+            crashes = int(number_of_experiences) - total_models
+            known = total_models-(unknown+silent)
 
             # Writing to the pdf the number of crashes at this specific delay
+            pdf.set_x(12)
             pdf.set_font("Arial", 'I')
             pdf.set_text_color(239, 124, 142)
-            pdf.cell(195, 15, 'Crashes at delay = {} equals {}'.format(unique_elements[i], crashes), 0, 1, '')
+            pdf.cell(195, 10, 'Summary of observed outcomes at delay  {} '.format(unique_elements[i]), 0, 1, '')
+
+            pdf.set_font("Arial", size=12)
+            pdf.set_text_color(0, 0, 0)
+
+            pdf.cell(195, 5, '      Silent cases = {}, ( {} % )'.format(silent,  float(silent) * 100 / float(number_of_experiences)), 0, 1, '')
+            pdf.cell(195, 5, '      Known models = {}, ( {} % )'.format(known ,  float(known) * 100 / float(number_of_experiences)), 0, 1, '')
+            pdf.cell(195, 5, '      Crashes = {}, ( {} % )'.format(crashes, float(crashes) * 100 /float(number_of_experiences)), 0, 1, '')
+            pdf.cell(195, 5, '      Unknown models = {}, ( {} % )'.format(unknown ,  float(unknown) * 100 / float(number_of_experiences)), 0, 1, '')
 
     pdf.output("report_physical_injection.pdf")
 
 
 def comparing_results_by_line(line, number_of_experiences, pdf):
+    global unknown
+    global silent
     """
         This function compares with one line of the file containing faulty behaviour
     """
@@ -228,44 +252,53 @@ def comparing_results_by_line(line, number_of_experiences, pdf):
 
     # Writing the fault injection outcome to the report
     pdf.set_font("Arial", 'B', size=15)
-    pdf.set_text_color(239, 124, 142)
-    pdf.multi_cell(195, 10, 'The output of the physical injection is :', 0, 1, '')
+    pdf.set_text_color(255, 22, 22)
+    pdf.multi_cell(195, 10, 'The outcome of the physical injection is :', 0, 1, '')
 
+    pdf.set_x(15)
     pdf.set_font("Arial", size=12)
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(195, 5, '{}'.format(line.to_list()), 0, 1, '')
 
     if len(result) == 0:  # If the array is empty then, there is no matched model : this is considered as an unknown
         # model
-        pdf.cell(60, 5, '   This is an unknown model !', 0, 1, '')
+        unknown = unknown + int(line[14])
+        pdf.set_x(25)
+        pdf.cell(60, 10, 'This is an unknown model !', 0, 1, '')
+
     else:
         name = ''
 
         # Writing to the pdf the number of possible models that match with this specific physical injection
+        pdf.set_x(15)
         pdf.set_font("Arial", 'U', size=15)
-        pdf.set_text_color(255, 194, 199)
+        pdf.set_text_color(105, 149, 193)
         pdf.cell(195, 15, 'There are {} possible models for this case:'.format(len(result)), 0, 1, '')
 
         for i in range(len(result)):
-
             # Numerating the possible models that match in the pdf file
+            pdf.set_x(20)
             pdf.set_font("Arial", 'B', 15)
-            pdf.set_text_color(182, 229, 216)
+            pdf.set_text_color(31, 132, 212)
             pdf.cell(195, 10, '* Model Number {} :'.format(i + 1), 0, 1, '')
 
             # Changing the SW model name from the one provided by the python code to a more detailed one
             name = changing_name(result[i])
+            if name == '        This is a SILENT case':
+                silent = silent + int(line[14])
 
             # Writing to the report the name of the model
+            pdf.set_x(25)
             pdf.set_font("Arial", size=12)
             pdf.set_text_color(0, 0, 0)
             pdf.multi_cell(195, 5, name, 0, 1, '')
 
     # We print the percent of times these models was observes
     pdf.set_font("Arial", 'B', size=12)
-    pdf.set_text_color(127, 143, 163)
+    pdf.set_text_color(22, 186, 108)
+    pdf.set_x(20)
     pdf.cell(195, 15,
-             '\n ====> This model was observed {} % of times \n'.format(line[14] * 100 / number_of_experiences), 0, 1,
+             '\n ===> This model was observed {} % of times \n'.format(line[14] * 100 / number_of_experiences), 0, 1,
              '')
 
 
@@ -319,24 +352,27 @@ def compare_RTL(RTL_file):
 
         if len(result) == 0:  # If the array is empty then, there is no matched model : this is considered as an unknown
             # model
-            pdf.cell(60, 5, '   This is an unknown model !', 0, 1, '')
+            pdf.cell(60, 10, 'This is an unknown model !', 0, 1, '')
         else:
             name = ''
 
             # possible software models that matches with the fault injection
+            pdf.set_x(15)
             pdf.set_font("Arial", 'U', size=15)
-            pdf.set_text_color(255, 194, 199)
+            pdf.set_text_color(105, 149, 193)
             pdf.cell(195, 15, 'There are {} possible models for this case:'.format(len(result)), 0, 1, '')
 
-            for i in range(len(result)):
+        for i in range(len(result)):
+                pdf.set_x(20)
                 pdf.set_font("Arial", 'B', 15)
-                pdf.set_text_color(182, 229, 216)
+                pdf.set_text_color(31, 132, 212)
                 pdf.cell(195, 10, '* Model Number {} :'.format(i + 1), 0, 1, '')
 
                 name = changing_name(
                     result[i])  # Changing the SW model name from the one provided by the python code to
 
                 # a more detailed one
+                pdf.set_x(25)
                 pdf.set_font("Arial", size=12)
                 pdf.set_text_color(0, 0, 0)
                 pdf.multi_cell(195, 5, name, 0, 1, '')

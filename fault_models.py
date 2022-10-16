@@ -922,7 +922,7 @@ def skip_and_repeat(array, array_initialisation):
                                                                  index_first_instruction_skipped) + 1):
 
                     for index_first_instruction_repeated in range(0, index_first_instruction_skipped -
-                                                                     number_of_instructions_repeated):
+                                                                     number_of_instructions_repeated + 1):
                         list_of_index_repeated = useful_functions.select_instruction(array,
                                                                                      number_of_instructions_repeated,
                                                                                      index_first_instruction_repeated)
